@@ -22,6 +22,17 @@ app.use(express_1.default.json());
 mongoose_1.default.connect('mongodb+srv://krishsoni:2203031050659@paytm.aujjoys.mongodb.net/aptos_users')
     .then(() => console.log('Connected to SecretBase'))
     .catch((err) => console.error('MongoDB connection error:', err));
+const playerSchema = new mongoose_1.default.Schema({
+    playerName: { type: String, required: true, unique: true },
+    aptosAccountAddress: { type: String, required: true }
+});
+const Player = mongoose_1.default.model('Player', playerSchema);
+const playerHistorySchema = new mongoose_1.default.Schema({
+    playerName: { type: String, required: true },
+    value: { type: Number, required: true },
+    date: { type: Date, default: Date.now },
+});
+const PlayerHistory = mongoose_1.default.model('PlayerHistory', playerHistorySchema);
 const userSchema = new mongoose_1.default.Schema({
     publicKey: { type: String, required: true },
     privateKey: { type: String, required: true },
@@ -65,6 +76,61 @@ app.post('/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         <p><strong>Public Key:</strong> ${publicKey}</p>
         <p><strong>Private Key (Hashed):</strong> ${user.privateKey}</p>
     `);
+}));
+// app.post('/addPlayer', async (req: Request, res: Response) => {
+//     const { playerName } = req.body;
+//     if (!playerName) {
+//         return res.status(400).send('Player name is required.');
+//     }
+//     try {
+//         const config = new AptosConfig({ network: Network.DEVNET });
+//         const aptos = new Aptos(config);
+//         let player = await Player.findOne({ playerName });
+//         let playerValue;
+//         if (player) {
+//             const account = await aptos.account(player.aptosAccountAddress);
+//             playerValue = account.balance;
+//             const history = new PlayerHistory({ playerName, value: playerValue });
+//             await history.save();
+//             res.send(`Player ${playerName} exists. Updated value: ${playerValue}`);
+//         } else {
+//             const aptosAccountAddress = await generateAccount();
+//             const account = await aptos.account(aptosAccountAddress);
+//             playerValue = account.balance;
+//             player = new Player({ playerName, aptosAccountAddress });
+//             await player.save();
+//             const history = new PlayerHistory({ playerName, value: playerValue });
+//             await history.save();
+//             res.send(`New Player ${playerName} added with value ${playerValue}`);
+//         }
+//     } catch (err) {
+//         console.error('Error handling player:', err);
+//         res.status(500).send('Failed to process player.');
+//     }
+// });
+app.get('/playerHistory/:playerName', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { playerName } = req.params;
+    if (!playerName) {
+        return res.status(400).send('Player name is required.');
+    }
+    try {
+        const history = yield PlayerHistory.find({ playerName }).sort({ date: -1 });
+        res.json(history);
+    }
+    catch (err) {
+        console.error('Error fetching player history:', err);
+        res.status(500).send('Failed to fetch player history.');
+    }
+}));
+app.get('/players', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const players = yield Player.find({});
+        res.json(players);
+    }
+    catch (err) {
+        console.error('Error fetching players:', err);
+        res.status(500).send('Failed to fetch players.');
+    }
 }));
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
