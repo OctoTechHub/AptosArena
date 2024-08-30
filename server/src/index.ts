@@ -3,13 +3,13 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import generateAccount from './playerAddress';
 import { Account, Aptos, AptosConfig, Network, SigningSchemeInput } from '@aptos-labs/ts-sdk';
-import { Player, PlayerHistory, User } from './db';
+import { connectToDatabase, Player, PlayerHistory, User } from './db';
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
-
+connectToDatabase();
 app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to Aptos Arena!');
 });
@@ -61,46 +61,34 @@ app.post('/signin', async (req: Request, res: Response) => {
 });
 
 app.post('/addPlayer', async (req: Request, res: Response) => {
-    const { firstName, lastName, value } = req.body;
+    const { firstName, lastName, value, quantity } = req.body;
+
+    // Ensure that required fields are not null or undefined
+    if (!firstName || !lastName) {
+        return res.status(400).send('Both firstName and lastName are required.');
+    }
+
     console.log('Adding Player:', firstName, lastName, value);
 
-    if (!firstName || !lastName) {
-        return res.status(400).send('First name and last name are required.');
-    }
-
     try {
-        let player = await Player.findOne({ firstName, lastName });
+        // Check for existing player
+        const existingPlayer = await Player.findOne({ firstName, lastName });
 
-        if (player) {
-            const previousValue = player.value;
-            player.value = value !== undefined ? value : previousValue;
-            await Player.create();
-            console.log(`Player ${firstName} ${lastName} updated. Current value: ${player.value}`);
-
-            const history = new PlayerHistory({ firstName, lastName, value: player.value });
-            await history.save();
-
-
-            res.send(`Player ${firstName} ${lastName} updated. Current value: ${player.value}`);
-        } else {
-            const aptosAccountAddress = await generateAccount();
-
-            player = new Player({ firstName, lastName, aptosAccountAddress, value: value || 0 });
-            await player.save();
-            console.log(`New Player ${firstName} ${lastName} added with value ${player.value}`);
-
-            const history = new PlayerHistory({ firstName, lastName, value: player.value });
-            await history.save();
-            console.log(`Player ${firstName} ${lastName} history added. Value: ${player.value}`);
-
-            res.send(`New Player ${firstName} ${lastName} added with value ${player.value}`);
+        if (existingPlayer) {
+            return res.status(400).send('Player already exists');
         }
-    } catch (err) {
-        
-            res.status(500).send('Failed to process player.');
-        console.log('Error adding player:', err);
+
+        // Attempt to create the player
+        const player = await Player.create({ firstName, lastName, quantity, value });
+        res.json({ player, message: 'Player added successfully' });
+
+    } catch (error) {
+        // Log the specific error
+        console.error('Error adding player:', error);
+        res.status(500).send('Failed to add player');
     }
 });
+
 
 
 app.get('/playerHistory/:firstName/:lastName', async (req: Request, res: Response) => {

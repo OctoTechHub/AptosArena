@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const playerAddress_1 = __importDefault(require("./playerAddress"));
 const ts_sdk_1 = require("@aptos-labs/ts-sdk");
 const db_1 = require("./db");
 const app = (0, express_1.default)();
 const port = 3000;
 app.use(express_1.default.json());
+(0, db_1.connectToDatabase)();
 app.get('/', (req, res) => {
     res.send('Welcome to Aptos Arena!');
 });
@@ -62,36 +62,26 @@ app.post('/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     `);
 }));
 app.post('/addPlayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { firstName, lastName, value } = req.body;
-    console.log('Adding Player:', firstName, lastName, value);
+    const { firstName, lastName, value, quantity } = req.body;
+    // Ensure that required fields are not null or undefined
     if (!firstName || !lastName) {
-        return res.status(400).send('First name and last name are required.');
+        return res.status(400).send('Both firstName and lastName are required.');
     }
+    console.log('Adding Player:', firstName, lastName, value);
     try {
-        let player = yield db_1.Player.findOne({ firstName, lastName });
-        if (player) {
-            const previousValue = player.value;
-            player.value = value !== undefined ? value : previousValue;
-            yield db_1.Player.create();
-            console.log(`Player ${firstName} ${lastName} updated. Current value: ${player.value}`);
-            const history = new db_1.PlayerHistory({ firstName, lastName, value: player.value });
-            yield history.save();
-            res.send(`Player ${firstName} ${lastName} updated. Current value: ${player.value}`);
+        // Check for existing player
+        const existingPlayer = yield db_1.Player.findOne({ firstName, lastName });
+        if (existingPlayer) {
+            return res.status(400).send('Player already exists');
         }
-        else {
-            const aptosAccountAddress = yield (0, playerAddress_1.default)();
-            player = new db_1.Player({ firstName, lastName, aptosAccountAddress, value: value || 0 });
-            yield player.save();
-            console.log(`New Player ${firstName} ${lastName} added with value ${player.value}`);
-            const history = new db_1.PlayerHistory({ firstName, lastName, value: player.value });
-            yield history.save();
-            console.log(`Player ${firstName} ${lastName} history added. Value: ${player.value}`);
-            res.send(`New Player ${firstName} ${lastName} added with value ${player.value}`);
-        }
+        // Attempt to create the player
+        const player = yield db_1.Player.create({ firstName, lastName, quantity, value });
+        res.json({ player, message: 'Player added successfully' });
     }
-    catch (err) {
-        res.status(500).send('Failed to process player.');
-        console.log('Error adding player:', err);
+    catch (error) {
+        // Log the specific error
+        console.error('Error adding player:', error);
+        res.status(500).send('Failed to add player');
     }
 }));
 app.get('/playerHistory/:firstName/:lastName', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
