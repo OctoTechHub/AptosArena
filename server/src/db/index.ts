@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 async function connectToDatabase() {
     try {
-        await mongoose.connect('mongodb+srv://DevPatils:DevPatils@cluster0.mywzttp.mongodb.net/aptos');
+        await mongoose.connect('mongodb+srv://krishsoni:2203031050659@paytm.aujjoys.mongodb.net/aptos_users');
         console.log('Connected to MongoDB');
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
@@ -13,7 +13,10 @@ const playerSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     quantity: { type: Number, default: 0 },
-    value: { type: Number, default: 0 }
+    value: { type: Number, default: 0 },
+    imageUrl:{type:String,required:true},
+    role:{enum:[],required:true},
+    nationality:{type:String,required:true},
 });
 const Player = mongoose.model('Player', playerSchema);
 

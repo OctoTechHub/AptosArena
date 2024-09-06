@@ -16,7 +16,7 @@ const express_1 = __importDefault(require("express"));
 const db_1 = require("../db");
 const playerRouter = express_1.default.Router();
 playerRouter.post('/addPlayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { firstName, lastName, value, quantity } = req.body;
+    const { firstName, lastName, value, quantity, imgUrl, nationality } = req.body;
     // Ensure that required fields are not null or undefined
     if (!firstName || !lastName) {
         return res.status(400).send('Both firstName and lastName are required.');
@@ -29,7 +29,7 @@ playerRouter.post('/addPlayer', (req, res) => __awaiter(void 0, void 0, void 0, 
             return res.status(400).send('Player already exists');
         }
         // Attempt to create the player
-        const player = yield db_1.Player.create({ firstName, lastName, quantity, value });
+        const player = yield db_1.Player.create({ firstName, lastName, quantity, value, imageUrl: imgUrl, nationality });
         res.json({ player, message: 'Player added successfully' });
     }
     catch (error) {
@@ -85,14 +85,18 @@ playerRouter.get('/getPlayer/:id', (req, res) => __awaiter(void 0, void 0, void 
     const { id } = req.params;
     try {
         const player = yield db_1.Player.findById(id);
-        res.json(player);
+        res.send(`<h1>${player === null || player === void 0 ? void 0 : player.firstName}+${player === null || player === void 0 ? void 0 : player.lastName}</h1>` +
+            `<h1>${player === null || player === void 0 ? void 0 : player.quantity}</h1>` +
+            `<h1>${player === null || player === void 0 ? void 0 : player.value}</h1>` +
+            `<img src=${player === null || player === void 0 ? void 0 : player.imageUrl}></img>` +
+            `<h1>${player === null || player === void 0 ? void 0 : player.nationality}</h1>`);
     }
     catch (err) {
         console.error('Error fetching player:', err);
         res.status(500).send('Failed to fetch player');
     }
 })); ////Get player by id
-playerRouter.get('/players', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+playerRouter.get('/getallplayers', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const players = yield db_1.Player.find({});
         res.json(players);
