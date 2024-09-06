@@ -12,11 +12,12 @@ async function connectToDatabase() {
 const playerSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    quantity: { type: Number, default: 0 },
-    value: { type: Number, default: 0 },
-    imageUrl:{type:String,required:true},
-    role: { type: String, enum: ['Wicketkeeper', 'Bowler', 'Batsman', 'All-Rounder'], required: true }, // Example roles
-    nationality:{type:String,required:true},
+    value: { type: Number },
+    quantity: { type: Number },
+    imageUrl: { type: String },
+    nationality: { type: String },
+    role: { type: String },
+    playerName: { type: String, unique: true, required: true } // Example field
 });
 const Player = mongoose.model('Player', playerSchema);
 

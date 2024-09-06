@@ -17,24 +17,39 @@ const db_1 = require("../db");
 const playerRouter = express_1.default.Router();
 playerRouter.post('/addPlayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { firstName, lastName, value, quantity, imgUrl, nationality, role } = req.body;
-    // Ensure that required fields are not null or undefined
     if (!firstName || !lastName) {
         return res.status(400).send('Both firstName and lastName are required.');
     }
-    console.log('Adding Player:', firstName, lastName, value);
+    const playerName = `${firstName}_${lastName}`; // Generate a unique playerName
+    console.log('Adding Player:', { firstName, lastName, value, quantity, imgUrl, nationality, role, playerName });
     try {
-        // Check for existing player
-        const existingPlayer = yield db_1.Player.findOne({ firstName, lastName });
+        // Check for existing player by playerName
+        const existingPlayer = yield db_1.Player.findOne({ playerName });
         if (existingPlayer) {
             return res.status(400).send('Player already exists');
         }
-        // Attempt to create the player
-        const player = yield db_1.Player.create({ firstName, lastName, quantity, value, imageUrl: imgUrl, nationality, role });
+        // Create new player
+        const player = yield db_1.Player.create({
+            firstName,
+            lastName,
+            value,
+            quantity,
+            imageUrl: imgUrl,
+            nationality,
+            role,
+            playerName // Ensure playerName is included
+        });
         res.json({ player, message: 'Player added successfully' });
     }
     catch (error) {
-        // Log the specific error
-        console.error('Error adding player:', error);
+        console.error('Error adding player:', {
+            message: error.message,
+            stack: error.stack,
+            index: error.index,
+            code: error.code,
+            keyPattern: error.keyPattern,
+            keyValue: error.keyValue
+        });
         res.status(500).send('Failed to add player');
     }
 }));

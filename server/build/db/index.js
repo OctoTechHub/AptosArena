@@ -12,8 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = exports.PlayerHistory = exports.Player = void 0;
-exports.connectToDatabase = connectToDatabase;
+exports.User = exports.PlayerHistory = exports.Player = exports.connectToDatabase = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 function connectToDatabase() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,14 +25,16 @@ function connectToDatabase() {
         }
     });
 }
+exports.connectToDatabase = connectToDatabase;
 const playerSchema = new mongoose_1.default.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    quantity: { type: Number, default: 0 },
-    value: { type: Number, default: 0 },
-    imageUrl: { type: String, required: true },
-    role: { type: String, enum: ['Wicketkeeper', 'Bowler', 'Batsman', 'All-Rounder'], required: true }, // Example roles
-    nationality: { type: String, required: true },
+    value: { type: Number },
+    quantity: { type: Number },
+    imageUrl: { type: String },
+    nationality: { type: String },
+    role: { type: String },
+    playerName: { type: String, unique: true, required: true } // Example field
 });
 const Player = mongoose_1.default.model('Player', playerSchema);
 exports.Player = Player;

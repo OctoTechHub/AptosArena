@@ -2,34 +2,50 @@ import express, { Request, Response } from 'express';
 import { Player } from '../db';
 const playerRouter = express.Router();
 playerRouter.post('/addPlayer', async (req: Request, res: Response) => {
-    const { firstName, lastName, value, quantity,imgUrl,nationality, role } = req.body;
+    const { firstName, lastName, value, quantity, imgUrl, nationality, role } = req.body;
 
-    // Ensure that required fields are not null or undefined
     if (!firstName || !lastName) {
         return res.status(400).send('Both firstName and lastName are required.');
     }
 
-    console.log('Adding Player:', firstName, lastName, value);
+    const playerName = `${firstName}_${lastName}`; // Generate a unique playerName
+
+    console.log('Adding Player:', { firstName, lastName, value, quantity, imgUrl, nationality, role, playerName });
 
     try {
-        // Check for existing player
-        const existingPlayer = await Player.findOne({ firstName, lastName });
+        // Check for existing player by playerName
+        const existingPlayer = await Player.findOne({ playerName });
 
         if (existingPlayer) {
             return res.status(400).send('Player already exists');
         }
 
-        // Attempt to create the player
-        const player = await Player.create({ firstName, lastName, quantity, value,imageUrl:imgUrl,nationality , role});
+        // Create new player
+        const player = await Player.create({
+            firstName,
+            lastName,
+            value,
+            quantity,
+            imageUrl: imgUrl,
+            nationality,
+            role,
+            playerName // Ensure playerName is included
+        });
+
         res.json({ player, message: 'Player added successfully' });
 
-    } catch (error) {
-        // Log the specific error
-        console.error('Error adding player:', error);
+        } catch (error: any) {
+        console.error('Error adding player:', {
+            message: error.message,
+            stack: error.stack,
+            index: error.index,
+            code: error.code,
+            keyPattern: error.keyPattern,
+            keyValue: error.keyValue
+        });
         res.status(500).send('Failed to add player');
     }
 });
-
 
 playerRouter.put('/updatePlayer/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
