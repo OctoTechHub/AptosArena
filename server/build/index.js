@@ -6,9 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const userRouter_1 = __importDefault(require("./routes/userRouter"));
 const playerRouter_1 = __importDefault(require("./routes/playerRouter"));
+const cors_1 = __importDefault(require("cors"));
 const db_1 = require("./db");
 const app = (0, express_1.default)();
 const port = 3000;
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 (0, db_1.connectToDatabase)();
 app.get('/', (req, res) => {

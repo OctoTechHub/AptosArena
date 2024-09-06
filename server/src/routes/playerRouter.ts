@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { Player } from '../db';
 const playerRouter = express.Router();
 playerRouter.post('/addPlayer', async (req: Request, res: Response) => {
-    const { firstName, lastName, value, quantity,imgUrl,nationality } = req.body;
+    const { firstName, lastName, value, quantity,imgUrl,nationality, role } = req.body;
 
     // Ensure that required fields are not null or undefined
     if (!firstName || !lastName) {
@@ -20,7 +20,7 @@ playerRouter.post('/addPlayer', async (req: Request, res: Response) => {
         }
 
         // Attempt to create the player
-        const player = await Player.create({ firstName, lastName, quantity, value,imageUrl:imgUrl,nationality });
+        const player = await Player.create({ firstName, lastName, quantity, value,imageUrl:imgUrl,nationality , role});
         res.json({ player, message: 'Player added successfully' });
 
     } catch (error) {
@@ -81,13 +81,7 @@ playerRouter.get('/getPlayer/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const player = await Player.findById(id);
-        res.send(
-            `<h1>${player?.firstName}+${player?.lastName}</h1>` +
-            `<h1>${player?.quantity}</h1>` +
-            `<h1>${player?.value}</h1>` +
-            `<img src=${player?.imageUrl}></img>` +
-            `<h1>${player?.nationality}</h1>`
-        )
+        res.json(player);
     } catch (err) {
         console.error('Error fetching player:', err);
         res.status(500).send('Failed to fetch player');

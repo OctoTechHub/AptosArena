@@ -3,10 +3,12 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import  userRouter  from './routes/userRouter';
 import  playerRouter  from './routes/playerRouter';
+import cors from 'cors';
 
 import { connectToDatabase } from './db';
 const app = express();
 const port = 3000;
+app.use(cors());
 
 app.use(express.json());
 

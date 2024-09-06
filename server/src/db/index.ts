@@ -15,7 +15,7 @@ const playerSchema = new mongoose.Schema({
     quantity: { type: Number, default: 0 },
     value: { type: Number, default: 0 },
     imageUrl:{type:String,required:true},
-    role:{enum:[],required:true},
+    role: { type: String, enum: ['Wicketkeeper', 'Bowler', 'Batsman', 'All-Rounder'], required: true }, // Example roles
     nationality:{type:String,required:true},
 });
 const Player = mongoose.model('Player', playerSchema);

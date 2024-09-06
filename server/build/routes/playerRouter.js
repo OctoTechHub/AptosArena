@@ -16,7 +16,7 @@ const express_1 = __importDefault(require("express"));
 const db_1 = require("../db");
 const playerRouter = express_1.default.Router();
 playerRouter.post('/addPlayer', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { firstName, lastName, value, quantity, imgUrl, nationality } = req.body;
+    const { firstName, lastName, value, quantity, imgUrl, nationality, role } = req.body;
     // Ensure that required fields are not null or undefined
     if (!firstName || !lastName) {
         return res.status(400).send('Both firstName and lastName are required.');
@@ -29,7 +29,7 @@ playerRouter.post('/addPlayer', (req, res) => __awaiter(void 0, void 0, void 0, 
             return res.status(400).send('Player already exists');
         }
         // Attempt to create the player
-        const player = yield db_1.Player.create({ firstName, lastName, quantity, value, imageUrl: imgUrl, nationality });
+        const player = yield db_1.Player.create({ firstName, lastName, quantity, value, imageUrl: imgUrl, nationality, role });
         res.json({ player, message: 'Player added successfully' });
     }
     catch (error) {
@@ -85,11 +85,7 @@ playerRouter.get('/getPlayer/:id', (req, res) => __awaiter(void 0, void 0, void 
     const { id } = req.params;
     try {
         const player = yield db_1.Player.findById(id);
-        res.send(`<h1>${player === null || player === void 0 ? void 0 : player.firstName}+${player === null || player === void 0 ? void 0 : player.lastName}</h1>` +
-            `<h1>${player === null || player === void 0 ? void 0 : player.quantity}</h1>` +
-            `<h1>${player === null || player === void 0 ? void 0 : player.value}</h1>` +
-            `<img src=${player === null || player === void 0 ? void 0 : player.imageUrl}></img>` +
-            `<h1>${player === null || player === void 0 ? void 0 : player.nationality}</h1>`);
+        res.json(player);
     }
     catch (err) {
         console.error('Error fetching player:', err);
