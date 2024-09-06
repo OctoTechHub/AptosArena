@@ -1,8 +1,13 @@
+import Navbar from "@/components/Navbar";
+import TopPlayerscards from "@/components/TopPlayerscards";
+
 const Home = () => {
   return (
-    <div className="flex items-center justify-center flex-col">
-      Hello From home
-    </div>
+    <>
+      <Navbar/>
+      <TopPlayerscards/>
+      </>
+      
   );
 }
 
