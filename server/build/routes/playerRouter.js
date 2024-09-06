@@ -92,7 +92,7 @@ playerRouter.get('/getPlayer/:id', (req, res) => __awaiter(void 0, void 0, void 
         res.status(500).send('Failed to fetch player');
     }
 })); ////Get player by id
-playerRouter.get('/players', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+playerRouter.get('/getallplayers', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const players = yield db_1.Player.find({});
         res.json(players);
