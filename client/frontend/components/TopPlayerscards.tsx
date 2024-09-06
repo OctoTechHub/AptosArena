@@ -8,6 +8,7 @@ interface Player {
   value: number;
   imageUrl: string;
   nationality: string;
+  role: string;
 }
 
 const TopPlayerscards = () => {
@@ -38,6 +39,8 @@ const TopPlayerscards = () => {
           <p className="text-center text-gray-500">Nationality: {player.nationality}</p>
           <p className="text-center text-gray-700 mt-2">Value: {player.value}</p>
           <p className="text-center text-gray-700 mt-2">Quantity: {player.quantity}</p>
+          <p className="text-center text-gray-700 mt-2">Role: {player.role}</p>
+          
         </div>
       ))}
     </div>
