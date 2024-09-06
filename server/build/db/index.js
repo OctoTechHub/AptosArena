@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = exports.PlayerHistory = exports.Player = exports.connectToDatabase = void 0;
+exports.User = exports.PlayerHistory = exports.Player = void 0;
+exports.connectToDatabase = connectToDatabase;
 const mongoose_1 = __importDefault(require("mongoose"));
 function connectToDatabase() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose_1.default.connect('mongodb://localhost:27017/aptos-arena');
+            yield mongoose_1.default.connect('mongodb+srv://DevPatils:DevPatils@cluster0.mywzttp.mongodb.net/aptos');
             console.log('Connected to MongoDB');
         }
         catch (error) {
@@ -25,7 +26,6 @@ function connectToDatabase() {
         }
     });
 }
-exports.connectToDatabase = connectToDatabase;
 const playerSchema = new mongoose_1.default.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },

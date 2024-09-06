@@ -68,6 +68,30 @@ playerRouter.put('/updatePlayerValue/:id', (req, res) => __awaiter(void 0, void 
         res.status(500).send('Failed to update player');
     }
 }));
+//////delete player
+playerRouter.delete('/deletePlayer/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        yield db_1.Player.findByIdAndDelete(id);
+        res.send('Player deleted successfully');
+    }
+    catch (err) {
+        console.error('Error deleting player:', err);
+        res.status(500).send('Failed to delete player');
+    }
+})); //////delete player
+///Get player by id
+playerRouter.get('/getPlayer/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const player = yield db_1.Player.findById(id);
+        res.json(player);
+    }
+    catch (err) {
+        console.error('Error fetching player:', err);
+        res.status(500).send('Failed to fetch player');
+    }
+})); ////Get player by id
 playerRouter.get('/players', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const players = yield db_1.Player.find({});

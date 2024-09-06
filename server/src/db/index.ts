@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 async function connectToDatabase() {
     try {
-        await mongoose.connect('mongodb://localhost:27017/aptos-arena');
+        await mongoose.connect('mongodb+srv://DevPatils:DevPatils@cluster0.mywzttp.mongodb.net/aptos');
         console.log('Connected to MongoDB');
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);

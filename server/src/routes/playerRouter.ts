@@ -64,8 +64,32 @@ playerRouter.put('/updatePlayerValue/:id', async (req: Request, res: Response) =
     }
 });
 
+//////delete player
+playerRouter.delete('/deletePlayer/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        await Player.findByIdAndDelete(id);
+        res.send('Player deleted successfully');
+    } catch (err) {
+        console.error('Error deleting player:', err);
+        res.status(500).send('Failed to delete player');
+    }
+});//////delete player
 
-playerRouter.get('/players', async (req: Request, res: Response) => {
+///Get player by id
+playerRouter.get('/getPlayer/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const player = await Player.findById(id);
+        res.json(player);
+    } catch (err) {
+        console.error('Error fetching player:', err);
+        res.status(500).send('Failed to fetch player');
+    }
+});////Get player by id
+
+
+playerRouter.get('/getallplayers', async (req: Request, res: Response) => {
     try {
         const players = await Player.find({});
         res.json(players);
