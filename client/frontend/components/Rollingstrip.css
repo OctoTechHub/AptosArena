@@ -1,0 +1,15 @@
+.rolling-strip {
+    display: flex; /* Ensure all player elements are in a row */
+    animation: roll 20s linear infinite; /* Speed can be adjusted */
+    white-space: nowrap;
+  }
+  
+  @keyframes roll {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
