@@ -1,7 +1,7 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 // Internal Components
-import { Header } from "@/components/Header";
+// import { Header } from "@/components/Header";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin"; 
