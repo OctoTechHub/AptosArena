@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { PinContainer } from "../components/ui/3d-pin";
 import axios from "axios";
 import Rollingstrip from "./Rollingstrip";
