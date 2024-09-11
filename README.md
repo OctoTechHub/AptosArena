@@ -14,7 +14,7 @@ CrickTrade is a **revolutionary platform** where users can trade virtual stocks 
 
 - **Real-Time Trading**: Buy and sell stocks of cricket players as matches progress, with prices updated dynamically based on in-game performance.
 - **Player Stats Integration**: We pull live player data to keep stock prices up to date and reflective of current form.
--**Cryptocurrency Payments**: Trade with ease using popular cryptocurrencies, including **Aptos** (via the Aptos testnet).
+- **Cryptocurrency Payments**: Trade with ease using popular cryptocurrencies, including **Aptos** (via the Aptos testnet).
 - **Strategize and Win**: Craft smart strategies by analyzing player form, upcoming fixtures, and market trends to maximize your gains.
 
 ---
