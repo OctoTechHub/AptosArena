@@ -8,6 +8,7 @@ const userRouter_1 = __importDefault(require("./routes/userRouter"));
 const playerRouter_1 = __importDefault(require("./routes/playerRouter"));
 const cors_1 = __importDefault(require("cors"));
 const db_1 = require("./db");
+const purchase_1 = __importDefault(require("./routes/purchase"));
 const app = (0, express_1.default)();
 const port = 3000;
 app.use((0, cors_1.default)());
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 });
 app.use('/api/user', userRouter_1.default);
 app.use('/api/player', playerRouter_1.default);
+app.use('/api/purchase', purchase_1.default);
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

@@ -6,6 +6,7 @@ import  playerRouter  from './routes/playerRouter';
 import cors from 'cors';
 
 import { connectToDatabase } from './db';
+import purchaseRouter from './routes/purchase';
 const app = express();
 const port = 3000;
 app.use(cors());
@@ -19,7 +20,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/user',userRouter);
 app.use('/api/player',playerRouter);
-
+app.use('/api/purchase',purchaseRouter);
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
