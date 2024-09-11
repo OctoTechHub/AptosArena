@@ -59,45 +59,54 @@ purchaseRouter.get("/get-balance/:account", (req, res) => __awaiter(void 0, void
 purchaseRouter.post('/purchase', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { privateKey } = req.body;
     if (!privateKey) {
-        return res.status(400).send('<p>Invalid request. Missing account address or private key.</p>');
+        console.error('Missing private key in request.');
+        return res.status(400).send('<p>Invalid request. Missing private key.</p>');
     }
-    const sellerAddress = process.env.TRANSFER_ACCOUNT_PUBLIC;
-    if (!sellerAddress) {
-        return res.status(500).send('<p>Seller address not configured.</p>');
+    const sellerPrivateKeyString = process.env.TRANSFER_ACCOUNT_PRIVATE_KEY;
+    if (!sellerPrivateKeyString) {
+        console.error('Seller private key not configured in environment variables.');
+        return res.status(500).send('<p>Seller private key not configured.</p>');
     }
     try {
+        const sellerPrivateKey = new ts_sdk_1.Ed25519PrivateKey(sellerPrivateKeyString);
         // Create an account object for the buyer using their private key
-        const buyerAccount = ts_sdk_1.Account.fromPrivateKey(privateKey);
-        // Amount to transfer
-        const amount = 0.1;
+        const buyerAccount = ts_sdk_1.Account.fromPrivateKey({ privateKey: new ts_sdk_1.Ed25519PrivateKey(privateKey) });
+        console.log('Buyer Account:', buyerAccount.accountAddress.toString());
+        // Create an account object for the seller using the seller private key
+        const sellerAccount = ts_sdk_1.Account.fromPrivateKey({ privateKey: sellerPrivateKey });
+        console.log('Seller Account:', sellerAccount.accountAddress.toString());
+        // Amount to transfer (in APT, ensure you use the correct format for the SDK)
+        const amount = 0.1 * 1000000; // Amount in micro-APT
+        console.log('Amount to Transfer:', amount);
         // Build the transaction
         const transaction = yield aptos.transaction.build.simple({
-            sender: sellerAddress,
+            sender: sellerAccount.accountAddress,
             data: {
-                function: '0x1::coin::transfer',
-                functionArguments: [sellerAddress, amount],
+                function: '0x1::coin::transfer', // Replace with your custom function if needed
+                functionArguments: [buyerAccount.accountAddress, amount],
             },
         });
-        console.log(transaction);
+        console.log('Transaction Built:', transaction);
         // Sign the transaction
         const signedTransaction = yield aptos.transaction.sign({
-            signer: buyerAccount,
+            signer: sellerAccount,
             transaction,
         });
-        console.log(signedTransaction);
+        console.log('Signed Transaction:', signedTransaction);
         // Submit the transaction
         const pendingTxn = yield aptos.transaction.submit.simple({
             transaction,
             senderAuthenticator: signedTransaction,
         });
-        console.log(pendingTxn);
+        console.log('Pending Transaction:', pendingTxn);
         // Wait for the transaction to be confirmed
         yield aptos.waitForTransaction({ transactionHash: pendingTxn.hash });
-        console.log('Transaction confirmed');
+        console.log('Transaction Confirmed:', pendingTxn.hash);
         res.send(`<p>Purchase successful. Transaction hash: ${pendingTxn.hash}</p>`);
     }
     catch (error) {
-        res.status(500).send(`<p>Failed to process purchase: </p>`);
+        console.error('Failed to process purchase:', error);
+        res.status(500).send(`<p>Failed to process purchase: ${error.message}</p>`);
     }
 }));
 exports.default = purchaseRouter;
