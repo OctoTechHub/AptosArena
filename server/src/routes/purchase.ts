@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
-import { Account, Aptos, AptosConfig, Ed25519Account, Network, Ed25519PrivateKey, SigningSchemeInput } from '@aptos-labs/ts-sdk';
+import { Account, Aptos, AptosConfig, Ed25519Account, Network, NetworkToNetworkName ,Ed25519PrivateKey, SigningSchemeInput } from '@aptos-labs/ts-sdk';
 import { configDotenv } from 'dotenv';
 
 configDotenv();
 const purchaseRouter = express.Router();
 
-const APTOS_NETWORK: Network = Network.TESTNET;
+const APTOS_NETWORK: Network = NetworkToNetworkName[process.env.APTOS_NETWORK ?? Network.DEVNET];
 const config = new AptosConfig({ network: APTOS_NETWORK });
 const aptos = new Aptos(config);
 
@@ -84,8 +84,8 @@ purchaseRouter.post('/purchase', async (req: Request, res: Response) => {
         // 3. Create an account object for the buyer using their private key
         // Convert the private key to an Ed25519PrivateKey object
         const buyerPrivateKey = new Ed25519PrivateKey(privateKey);
-        // Load the account using the private key
         const buyer = Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+        const fundBuyer=aptos.fundAccount({ accountAddress: buyer.accountAddress, amount: ALICE_INITIAL_BALANCE });
         console.log(`Buyer's address: ${buyer.accountAddress}`);
 
         // Check if the buyer's account exists and is funded

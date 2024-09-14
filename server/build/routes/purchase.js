@@ -11,13 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const ts_sdk_1 = require("@aptos-labs/ts-sdk");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.configDotenv)();
 const purchaseRouter = express_1.default.Router();
-const APTOS_NETWORK = ts_sdk_1.Network.TESTNET;
+const APTOS_NETWORK = ts_sdk_1.NetworkToNetworkName[(_a = process.env.APTOS_NETWORK) !== null && _a !== void 0 ? _a : ts_sdk_1.Network.DEVNET];
 const config = new ts_sdk_1.AptosConfig({ network: APTOS_NETWORK });
 const aptos = new ts_sdk_1.Aptos(config);
 const ALICE_INITIAL_BALANCE = 1000000000; // 1 APT in micro-APT
@@ -84,8 +85,8 @@ purchaseRouter.post('/purchase', (req, res) => __awaiter(void 0, void 0, void 0,
         // 3. Create an account object for the buyer using their private key
         // Convert the private key to an Ed25519PrivateKey object
         const buyerPrivateKey = new ts_sdk_1.Ed25519PrivateKey(privateKey);
-        // Load the account using the private key
         const buyer = ts_sdk_1.Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+        const fundBuyer = aptos.fundAccount({ accountAddress: buyer.accountAddress, amount: ALICE_INITIAL_BALANCE });
         console.log(`Buyer's address: ${buyer.accountAddress}`);
         // Check if the buyer's account exists and is funded
         const buyerBalance = yield aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
