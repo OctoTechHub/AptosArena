@@ -1,116 +1,127 @@
 import express, { Request, Response } from 'express';
 import { Account, Aptos, AptosConfig, Ed25519Account, Network, Ed25519PrivateKey, SigningSchemeInput } from '@aptos-labs/ts-sdk';
-import axios from 'axios';
 import { configDotenv } from 'dotenv';
+
 configDotenv();
 const purchaseRouter = express.Router();
-const config = new AptosConfig({ network: Network.TESTNET });
+
+const APTOS_NETWORK: Network = Network.TESTNET;
+const config = new AptosConfig({ network: APTOS_NETWORK });
 const aptos = new Aptos(config);
 
+const ALICE_INITIAL_BALANCE = 1_000_000_000; // 1 APT in micro-APT
+const TRANSFER_AMOUNT = 100_000; // 0.1 APT in micro-APT (Correct value)
 
+// Route to create a new account
 purchaseRouter.get("/create-account", async (req: Request, res: Response) => {
-    const account = Account.generate({
-        scheme: SigningSchemeInput.Ed25519,
-        legacy: false,
-    });
+    try {
+        const account = Account.generate({
+            scheme: SigningSchemeInput.Ed25519,
+            legacy: false,
+        });
 
-    console.log('Generated Account:');
-    console.log(`Public Key: ${account.publicKey}`);
-    console.log(`Private Key: ${account.privateKey}`);
+        console.log('Generated Account:');
+        console.log(`Public Key: ${account.publicKey}`);
+        console.log(`Private Key: ${account.privateKey}`);
 
-    // res.send(`
-    //     <h2>Generated Account</h2>
-    //     <p><strong>Public Key:</strong> ${account.publicKey}</p>
-    //     <p><strong>Private Key:</strong> ${account.privateKey}</p>
-    // `);
-    res.send(`${account.publicKey} ${account.privateKey}`);
-})
+        res.send(`${account.publicKey} ${account.privateKey}`);
+    } catch (error) {
+        console.error('Failed to create account:', error);
+        res.status(500).send('<p>Failed to create account.</p>');
+    }
+});
+
+// Route to fund an account using Aptos Testnet Faucet
 purchaseRouter.post('/fund-account', async (req: Request, res: Response) => {
     const { accountAddress } = req.body;
 
     if (!accountAddress) {
         return res.status(400).send('<p>Invalid account address</p>');
     }
-    const amount = 1000000000;
-    const fundedAccount = await aptos.fundAccount({ accountAddress, amount });
-    console.log('Funded Account:');
-    res.json(fundedAccount);
 
-})
+    try {
+        const fundedAccount = await aptos.fundAccount({ accountAddress, amount: ALICE_INITIAL_BALANCE });
+        console.log('Funded Account:', fundedAccount);
+
+        res.json(fundedAccount);
+    } catch (error) {
+        console.error('Failed to fund account:', error);
+        res.status(500).send('<p>Failed to fund account.</p>');
+    }
+});
+
+// Route to get the balance of an account
 purchaseRouter.get("/get-balance/:account", async (req: Request, res: Response) => {
     const { account } = req.params;
 
     try {
-        // Fetch account details
-        const accountDetails = await axios.get(`https://api.testnet.staging.aptoslabs.com/v1/accounts/${account}/resources?limit=999`);
-        res.json({"apt token":accountDetails.data[1].data.coin.value});
+        // Fetch account balance using the Aptos SDK
+        const balance = await aptos.getAccountAPTAmount({ accountAddress: account });
+        res.json({ "apt token": balance });
     } catch (error) {
-        res.status(500).send(`<p>Failed to get balance:</p>`);
+        console.error('Failed to get balance:', error);
+        res.status(500).send('<p>Failed to get balance.</p>');
     }
 });
 
-
+// Route to handle the purchase transaction
+// Route to handle the purchase transaction
 purchaseRouter.post('/purchase', async (req: Request, res: Response) => {
     const { privateKey } = req.body;
 
     if (!privateKey) {
-        console.error('Missing private key in request.');
         return res.status(400).send('<p>Invalid request. Missing private key.</p>');
     }
 
-    const sellerPrivateKeyString = process.env.TRANSFER_ACCOUNT_PRIVATE_KEY;
-    if (!sellerPrivateKeyString) {
-        console.error('Seller private key not configured in environment variables.');
-        return res.status(500).send('<p>Seller private key not configured.</p>');
-    }
-
     try {
-        const sellerPrivateKey = new Ed25519PrivateKey(sellerPrivateKeyString);
+        // 1. Generate a new seller account
+        const seller = Account.generate({ scheme: SigningSchemeInput.Ed25519, legacy: false });
+        console.log(`Seller's address: ${seller.accountAddress}`);
 
-        // Create an account object for the buyer using their private key
-        const buyerAccount = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey(privateKey) });
-        console.log('Buyer Account:', buyerAccount.accountAddress.toString());
+        // 2. Fund the seller account with 1 APT (for testing purposes)
+        await aptos.fundAccount({ accountAddress: seller.accountAddress, amount: ALICE_INITIAL_BALANCE });
 
-        // Create an account object for the seller using the seller private key
-        const sellerAccount = Account.fromPrivateKey({ privateKey: sellerPrivateKey }) as Ed25519Account;
-        console.log('Seller Account:', sellerAccount.accountAddress.toString());
+        // 3. Create an account object for the buyer using their private key
+        // Convert the private key to an Ed25519PrivateKey object
+        const buyerPrivateKey = new Ed25519PrivateKey(privateKey);
+        // Load the account using the private key
+        const buyer = Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+        console.log(`Buyer's address: ${buyer.accountAddress}`);
 
-        // Amount to transfer (in APT, ensure you use the correct format for the SDK)
-        const amount = 0.1 * 1_000_000; // Amount in micro-APT
-        console.log('Amount to Transfer:', amount);
+        // Check if the buyer's account exists and is funded
+        const buyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
+        console.log(`Buyer balance before transaction: ${buyerBalance}`);
 
-        // Build the transaction
-        const transaction = await aptos.transaction.build.simple({
-            sender: sellerAccount.accountAddress,
-            data: {
-                function: '0x1::coin::transfer', // Replace with your custom function if needed
-                functionArguments: [buyerAccount.accountAddress, amount],
-            },
+        if (buyerBalance < TRANSFER_AMOUNT) {
+            return res.status(400).send('<p>Buyer account does not have enough funds.</p>');
+        }
+
+        // 4. Transfer the amount from buyer to seller
+        const transaction = await aptos.transferCoinTransaction({
+            sender: buyer.accountAddress,
+            recipient: seller.accountAddress,
+            amount: TRANSFER_AMOUNT,
         });
-        console.log('Transaction Built:', transaction);
 
-        // Sign the transaction
-        const signedTransaction = aptos.transaction.sign({
-            signer: sellerAccount,
-            transaction,
+        const pendingTxn = await aptos.signAndSubmitTransaction({ signer: buyer, transaction });
+        const response = await aptos.waitForTransaction({ transactionHash: pendingTxn.hash });
+        console.log(`Transaction successful: ${response.hash}`);
+
+        // Show updated balances
+        const newBuyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
+        const newSellerBalance = await aptos.getAccountAPTAmount({ accountAddress: seller.accountAddress });
+
+        res.send({
+            message: 'Transaction successful',
+            transactionHash: response.hash,
+            newBuyerBalance,
+            newSellerBalance,
         });
-        console.log('Signed Transaction:', signedTransaction);
-
-        // Submit the transaction
-        const pendingTxn = await aptos.transaction.submit.simple({
-            transaction,
-            senderAuthenticator: signedTransaction,
-        });
-        console.log('Pending Transaction:', pendingTxn);
-
-        // Wait for the transaction to be confirmed
-        await aptos.waitForTransaction({ transactionHash: pendingTxn.hash });
-        console.log('Transaction Confirmed:', pendingTxn.hash);
-
-        res.send(`<p>Purchase successful. Transaction hash: ${pendingTxn.hash}</p>`);
-    } catch (error : any) {
-        console.error('Failed to process purchase:', error);
-        res.status(500).send(`<p>Failed to process purchase: ${error.message}</p>`);
+    } catch (error: any) {
+        console.error('Failed to process transaction:', error);
+        res.status(500).send(`<p>Failed to process transaction: ${error.message}</p>`);
     }
 });
+
+
 export default purchaseRouter;
