@@ -15,7 +15,7 @@ function App() {
         {/* <Header /> */}
         <div className="flex items-center justify-center flex-col">
           <Routes>
-            <Route path="/" element={connected ? <Home /> : <Signup />} />
+            <Route path="/" element= {<Home/>} />
             <Route path="/signin" element={<Signin />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/home" element={<Home />} />
