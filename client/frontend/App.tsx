@@ -1,4 +1,3 @@
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 // Internal Components
 // import { Header } from "@/components/Header";
@@ -7,7 +6,6 @@ import Signup from "./pages/Signup";
 import Signin from "./pages/Signin"; 
 
 function App() {
-  const { connected } = useWallet();
 
   return (
     <>

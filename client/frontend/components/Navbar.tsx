@@ -1,30 +1,12 @@
-import { useState } from 'react';
-import axios from 'axios';
-// import logo from '../Assets/logo-removebg-preview (1).png';  // Import the logo image
+import { useNavigate } from 'react-router-dom'; // Add this import
+import { WalletSelector } from './WalletSelector';
 
 const Navbar = () => {
-  const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [privateKey, setPrivateKey] = useState<string | null>(null);
 
-  const handleSignIn = async () => {
-    try {
-      // Replace with your sign-in API endpoint
-      const response = await axios.post('/api/signin', {
-        // You may need to provide a way to get these credentials
-        publicKey: 'samplePublicKey',
-        privateKey: 'samplePrivateKey',
-      });
+  const navigate = useNavigate(); // Initialize useNavigate
 
-      // Extract public and private keys from the response
-      const { publicKey, privateKey } = response.data;
-      setPublicKey(publicKey);
-      setPrivateKey(privateKey);
-
-      alert(`Signed in! Public Key: ${publicKey}\nPrivate Key: ${privateKey}`);
-    } catch (error) {
-      console.error('Error during sign-in:', error);
-      alert('Failed to sign in.');
-    }
+  const handleSignIn = () => {
+    navigate('/signin'); // Redirect to /signin
   };
 
   return (
@@ -50,6 +32,9 @@ const Navbar = () => {
         >
           Sign In
         </button>
+        <div>
+          <WalletSelector/>
+        </div>
       </div>
     </nav>
   );

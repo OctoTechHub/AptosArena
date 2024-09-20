@@ -11,7 +11,7 @@ const db_1 = require("./db");
 const purchase_1 = __importDefault(require("./routes/purchase"));
 const app = (0, express_1.default)();
 const port = 3000;
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({ origin: 'http://localhost:5173' }));
 app.use(express_1.default.json());
 (0, db_1.connectToDatabase)();
 app.get('/', (req, res) => {
