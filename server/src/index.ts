@@ -1,6 +1,4 @@
 import express, { Request, Response } from 'express';
-import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
 import  userRouter  from './routes/userRouter';
 import  playerRouter  from './routes/playerRouter';
 import cors from 'cors';
@@ -9,7 +7,7 @@ import { connectToDatabase } from './db';
 import purchaseRouter from './routes/purchase';
 const app = express();
 const port = 3000;
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173' }));
 
 app.use(express.json());
 

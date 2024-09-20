@@ -1,11 +1,6 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { Account, Aptos, AptosConfig, Network, SigningSchemeInput } from '@aptos-labs/ts-sdk';
-
-
-
-
-
+import { Account, SigningSchemeInput } from '@aptos-labs/ts-sdk';
 const userRouter = express.Router();
 import { User } from '../db';
 userRouter.post('/signin', async (req: Request, res: Response) => {

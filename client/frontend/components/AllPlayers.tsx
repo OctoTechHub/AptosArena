@@ -43,7 +43,7 @@ const AllPlayers = () => {
         <table className="min-w-full bg-gray-800 text-white rounded-lg shadow-lg border border-gray-700">
           <thead>
             <tr className="bg-gray-700 text-left">
-              <th className="px-6 py-3">Image</th> {/* New header */}
+              <th className="px-6 py-3">Image</th> 
               <th className="px-6 py-3">First Name</th>
               <th className="px-6 py-3">Last Name</th>
               <th className="px-6 py-3">Nationality</th>

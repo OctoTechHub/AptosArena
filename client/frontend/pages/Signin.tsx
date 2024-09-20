@@ -1,23 +1,49 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Signin = () => {
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false); // Add a state to control the popup visibility
+
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   const handleGenerateKeys = async () => {
     try {
-      const response = await axios.get('/api/generateAccount');
-      const { publicKey, privateKey } = response.data;
+      const response = await axios.get('http://localhost:3000/api/user/generateAccount');
+      const { data } = response;
+      const publicKey = data.match(/<p><strong>Public Key:<\/strong> (.*)<\/p>/)[1];
+      const privateKey = data.match(/<p><strong>Private Key:<\/strong> (.*)<\/p>/)[1];
       setPublicKey(publicKey);
       setPrivateKey(privateKey);
+      localStorage.setItem('publicKey', publicKey);
+      localStorage.setItem('privateKey', privateKey);
+      setShowPopup(true); // Show the popup when keys are generated successfully
     } catch (error) {
       console.error('Error generating keys:', error);
     }
   };
 
+  const handleSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const publicKey = (document.getElementById('publicKey') as HTMLInputElement).value;
+    const privateKey = (document.getElementById('privateKey') as HTMLInputElement).value;
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/user/signin', { publicKey, privateKey });
+      console.log('Sign-In Response:', response.data);
+
+      if (response.status === 200) {
+        navigate('/'); // Redirect to the home page upon successful sign-in
+      }
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex items-center justify-center h-screen bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Sign In</h1>
         
@@ -43,6 +69,7 @@ const Signin = () => {
           </div>
           
           <button
+            onClick={handleSignIn}
             type="submit"
             className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-700 transition"
           >
@@ -58,10 +85,19 @@ const Signin = () => {
             Generate New Keys
           </button>
 
-          {publicKey && privateKey && (
-            <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
-              <p><strong>Public Key:</strong> {publicKey}</p>
-              <p><strong>Private Key:</strong> {privateKey}</p>
+          {showPopup && (
+            <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+                <h1 className="text-3xl font-bold text-gray-800 mb-8">Generated Keys</h1>
+                <p><strong>Public Key:</strong> {publicKey}</p>
+                <p><strong>Private Key:</strong> {privateKey}</p>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
         </div>
