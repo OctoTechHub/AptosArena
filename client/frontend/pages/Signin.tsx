@@ -135,7 +135,7 @@ const Signin = () => {
               </div>
               <button
                 onClick={() => setShowPopup(false)}
-                className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
+                className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-800 transition"
               >
                 Close
               </button>
