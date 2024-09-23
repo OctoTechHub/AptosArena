@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Navbar from '@/components/Navbar';
+import Rollingstrip from '@/components/Rollingstrip';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
 
 const Signin = () => {
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
-  const [showPopup, setShowPopup] = useState(false); // Add a state to control the popup visibility
+  const [showPopup, setShowPopup] = useState(false);
 
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate();
 
   const handleGenerateKeys = async () => {
     try {
@@ -19,7 +23,7 @@ const Signin = () => {
       setPrivateKey(privateKey);
       localStorage.setItem('publicKey', publicKey);
       localStorage.setItem('privateKey', privateKey);
-      setShowPopup(true); // Show the popup when keys are generated successfully
+      setShowPopup(true);
     } catch (error) {
       console.error('Error generating keys:', error);
     }
@@ -32,77 +36,114 @@ const Signin = () => {
 
     try {
       const response = await axios.post('http://localhost:3000/api/user/signin', { publicKey, privateKey });
-      console.log('Sign-In Response:', response.data);
-
       if (response.status === 200) {
-        navigate('/'); // Redirect to the home page upon successful sign-in
+        navigate('/');
       }
     } catch (error) {
       console.error('Error signing in:', error);
     }
   };
 
+  const handleCopyToClipboard = (key: string | null) => {
+    if (key) {
+      navigator.clipboard.writeText(key);
+      alert(`${key ? 'Public Key' : 'Private Key'} copied to clipboard!`);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Sign In</h1>
-        
-        <form>
-          <div className="mb-6">
-            <label htmlFor="publicKey" className="block text-gray-700 text-sm font-medium mb-2">Public Key</label>
-            <input
-              id="publicKey"
-              type="text"
-              placeholder="Enter your public key"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label htmlFor="privateKey" className="block text-gray-700 text-sm font-medium mb-2">Private Key</label>
-            <input
-              id="privateKey"
-              type="password"
-              placeholder="Enter your private key"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
-          </div>
-          
-          <button
-            onClick={handleSignIn}
-            type="submit"
-            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Sign In
-          </button>
-        </form>
+    <>
+      <Navbar />
+      <Rollingstrip />
+      <div className="w-full h-screen flex justify-center items-center bg-gradient-to-r bg-gray-900">
+        <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
+          <h1 className="text-4xl font-bold text-white mb-8 text-center">Sign In</h1>
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleGenerateKeys}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-800 transition"
-          >
-            Generate New Keys
-          </button>
-
-          {showPopup && (
-            <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center">
-              <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-                <h1 className="text-3xl font-bold text-gray-800 mb-8">Generated Keys</h1>
-                <p><strong>Public Key:</strong> {publicKey}</p>
-                <p><strong>Private Key:</strong> {privateKey}</p>
-                <button
-                  onClick={() => setShowPopup(false)}
-                  className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Close
-                </button>
-              </div>
+          <form>
+            <div className="mb-6">
+              <label htmlFor="publicKey" className="block text-white text-sm font-medium mb-2">Public Key</label>
+              <input
+                id="publicKey"
+                type="text"
+                placeholder="Enter your public key"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
             </div>
-          )}
+
+            <div className="mb-6">
+              <label htmlFor="privateKey" className="block text-white text-sm font-medium mb-2">Private Key</label>
+              <input
+                id="privateKey"
+                type="password"
+                placeholder="Enter your private key"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+
+            <button
+              onClick={handleSignIn}
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg shadow-md hover:bg-blue-700 transition"
+            >
+              Sign In
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleGenerateKeys}
+              className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
+            >
+              Generate New Keys
+            </button>
+          </div>
         </div>
+
+        {showPopup && (
+          <div className="fixed right-0 top-0 h-full w-1/3 bg-gray-800 bg-opacity-70 flex flex-col justify-center items-center z-50 p-4">
+            <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-xs border border-gray-600 relative">
+              <button
+                onClick={() => setShowPopup(false)}
+                className="absolute top-2 right-2 text-white text-lg font-bold"
+              >
+                &times;
+              </button>
+              <h1 className="text-3xl font-bold text-white mb-4">Generated Keys</h1>
+              <div className="bg-gray-700 p-4 rounded-lg mb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    <strong>Public Key:</strong> {publicKey}
+                  </p>
+                  <div
+                    className="flex items-center bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition"
+                    onClick={() => handleCopyToClipboard(publicKey)}
+                  >
+                    <FontAwesomeIcon icon={faCopy} className="text-white" />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    <strong>Private Key:</strong> {privateKey}
+                  </p>
+                  <div
+                    className="flex items-center bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition"
+                    onClick={() => handleCopyToClipboard(privateKey)}
+                  >
+                    <FontAwesomeIcon icon={faCopy} className="text-white" />
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPopup(false)}
+                className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

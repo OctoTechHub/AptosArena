@@ -72,7 +72,7 @@ purchaseRouter.get("/get-balance/:account", (req, res) => __awaiter(void 0, void
 }));
 // Route to handle the purchase transaction
 purchaseRouter.post('/buy-player', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _a;
     const { privateKey, publicKey, amount, playerId, decrementAmount } = req.body;
     if (!privateKey) {
         return res.status(400).send('<p>Invalid request. Missing private key.</p>');
@@ -89,7 +89,7 @@ purchaseRouter.post('/buy-player', (req, res) => __awaiter(void 0, void 0, void 
         return res.status(400).send('<p>Invalid request. Decrement amount must be greater than zero.</p>');
     }
     // Ensure that the player has enough quantity
-    if (((_b = player.quantity) !== null && _b !== void 0 ? _b : 0) < decrementAmount) {
+    if (((_a = player.quantity) !== null && _a !== void 0 ? _a : 0) < decrementAmount) {
         return res.status(400).send('<p>Not enough player quantity available.</p>');
     }
     try {

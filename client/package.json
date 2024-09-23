@@ -20,6 +20,8 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "1.26.0",
     "@aptos-labs/wallet-adapter-react": "^3.5.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
