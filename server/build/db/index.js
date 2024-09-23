@@ -12,7 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = exports.PlayerHistory = exports.Player = exports.connectToDatabase = void 0;
+exports.User = exports.PlayerHistory = exports.Player = void 0;
+exports.connectToDatabase = connectToDatabase;
 const mongoose_1 = __importDefault(require("mongoose"));
 function connectToDatabase() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -25,7 +26,6 @@ function connectToDatabase() {
         }
     });
 }
-exports.connectToDatabase = connectToDatabase;
 const playerSchema = new mongoose_1.default.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -49,6 +49,7 @@ exports.PlayerHistory = PlayerHistory;
 const userSchema = new mongoose_1.default.Schema({
     publicKey: { type: String, required: true },
     privateKey: { type: String, required: true },
+    stocksOwned: { type: Array, default: [] },
 });
 const User = mongoose_1.default.model('User', userSchema);
 exports.User = User;

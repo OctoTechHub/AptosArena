@@ -67,7 +67,7 @@ const AllPlayers = () => {
                 <td className="px-6 py-4">{player.lastName}</td>
                 <td className="px-6 py-4">{player.nationality}</td>
                 <td className="px-6 py-4">{player.role}</td>
-                <td className="px-6 py-4">${player.value}</td>
+                <td className="px-6 py-4">{player.value} APT</td>
                 <td className="px-6 py-4">{player.quantity}</td>
                 <td className="px-6 py-4">
                   <div className="flex gap-4">

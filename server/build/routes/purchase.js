@@ -16,6 +16,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const ts_sdk_1 = require("@aptos-labs/ts-sdk");
 const dotenv_1 = require("dotenv");
+const db_1 = require("../db");
 (0, dotenv_1.configDotenv)();
 const purchaseRouter = express_1.default.Router();
 const APTOS_NETWORK = ts_sdk_1.NetworkToNetworkName[(_a = process.env.APTOS_NETWORK) !== null && _a !== void 0 ? _a : ts_sdk_1.Network.DEVNET];
@@ -70,11 +71,26 @@ purchaseRouter.get("/get-balance/:account", (req, res) => __awaiter(void 0, void
     }
 }));
 // Route to handle the purchase transaction
-// Route to handle the purchase transaction
-purchaseRouter.post('/purchase', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { privateKey } = req.body;
+purchaseRouter.post('/buy-player', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { privateKey, publicKey, amount, playerId, decrementAmount } = req.body;
     if (!privateKey) {
         return res.status(400).send('<p>Invalid request. Missing private key.</p>');
+    }
+    const player = yield db_1.Player.findById(playerId);
+    if (!player) {
+        return res.status(400).send('<p>Invalid request. Player not found.</p>');
+    }
+    const user = yield db_1.User.findOne({ publicKey });
+    if (!user) {
+        return res.status(400).send('<p>Invalid request. User not found.</p>');
+    }
+    if (!decrementAmount || decrementAmount <= 0) {
+        return res.status(400).send('<p>Invalid request. Decrement amount must be greater than zero.</p>');
+    }
+    // Ensure that the player has enough quantity
+    if (((_a = player.quantity) !== null && _a !== void 0 ? _a : 0) < decrementAmount) {
+        return res.status(400).send('<p>Not enough player quantity available.</p>');
     }
     try {
         // 1. Generate a new seller account
@@ -83,22 +99,23 @@ purchaseRouter.post('/purchase', (req, res) => __awaiter(void 0, void 0, void 0,
         // 2. Fund the seller account with 1 APT (for testing purposes)
         yield aptos.fundAccount({ accountAddress: seller.accountAddress, amount: ALICE_INITIAL_BALANCE });
         // 3. Create an account object for the buyer using their private key
-        // Convert the private key to an Ed25519PrivateKey object
         const buyerPrivateKey = new ts_sdk_1.Ed25519PrivateKey(privateKey);
         const buyer = ts_sdk_1.Account.fromPrivateKey({ privateKey: buyerPrivateKey });
-        const fundBuyer = aptos.fundAccount({ accountAddress: buyer.accountAddress, amount: ALICE_INITIAL_BALANCE });
-        console.log(`Buyer's address: ${buyer.accountAddress}`);
-        // Check if the buyer's account exists and is funded
         const buyerBalance = yield aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
+        if (buyerBalance == 0) {
+            const fundBuyer = yield aptos.fundAccount({ accountAddress: buyer.accountAddress, amount: ALICE_INITIAL_BALANCE });
+            console.log(`Buyer's address: ${buyer.accountAddress}`);
+        }
+        // Check if the buyer's account exists and is funded
         console.log(`Buyer balance before transaction: ${buyerBalance}`);
-        if (buyerBalance < TRANSFER_AMOUNT) {
+        if (buyerBalance < amount) {
             return res.status(400).send('<p>Buyer account does not have enough funds.</p>');
         }
         // 4. Transfer the amount from buyer to seller
         const transaction = yield aptos.transferCoinTransaction({
             sender: buyer.accountAddress,
             recipient: seller.accountAddress,
-            amount: TRANSFER_AMOUNT,
+            amount: amount,
         });
         const pendingTxn = yield aptos.signAndSubmitTransaction({ signer: buyer, transaction });
         const response = yield aptos.waitForTransaction({ transactionHash: pendingTxn.hash });
@@ -106,11 +123,28 @@ purchaseRouter.post('/purchase', (req, res) => __awaiter(void 0, void 0, void 0,
         // Show updated balances
         const newBuyerBalance = yield aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
         const newSellerBalance = yield aptos.getAccountAPTAmount({ accountAddress: seller.accountAddress });
+        console.log(`Buyer balance after transaction: ${newBuyerBalance}`);
+        // 5. Update player quantity
+        const playerUpdate = yield db_1.Player.findByIdAndUpdate(playerId, { $inc: { quantity: -decrementAmount } }, { new: true });
+        // 6. Update user's stocksOwned field
+        const stockIndex = user.stocksOwned.findIndex(stock => stock.playerId === playerId);
+        if (stockIndex !== -1) {
+            // Player already exists, increment the quantity
+            user.stocksOwned[stockIndex].quantity += decrementAmount;
+        }
+        else {
+            // Player doesn't exist, add a new entry
+            user.stocksOwned.push({ playerId, quantity: decrementAmount });
+        }
+        // Save the updated user document
+        const userUpdate = yield user.save();
         res.send({
             message: 'Transaction successful',
             transactionHash: response.hash,
             newBuyerBalance,
             newSellerBalance,
+            userUpdate,
+            playerUpdate
         });
     }
     catch (error) {

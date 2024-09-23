@@ -32,6 +32,7 @@ const PlayerHistory = mongoose.model('PlayerHistory', playerHistorySchema);
 const userSchema = new mongoose.Schema({
     publicKey: { type: String, required: true },
     privateKey: { type: String, required: true },
+    stocksOwned: { type: Array, default: [] },
 });
 const User = mongoose.model('User', userSchema);
 
