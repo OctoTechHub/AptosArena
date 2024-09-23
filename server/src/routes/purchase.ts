@@ -66,6 +66,8 @@ purchaseRouter.get("/get-balance/:account", async (req: Request, res: Response) 
 
 // Route to handle the purchase transaction
 // Route to handle the purchase transaction
+
+
 purchaseRouter.post('/purchase', async (req: Request, res: Response) => {
     const { privateKey } = req.body;
 
@@ -117,6 +119,7 @@ purchaseRouter.post('/purchase', async (req: Request, res: Response) => {
             newBuyerBalance,
             newSellerBalance,
         });
+        
     } catch (error: any) {
         console.error('Failed to process transaction:', error);
         res.status(500).send(`<p>Failed to process transaction: ${error.message}</p>`);
