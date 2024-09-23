@@ -105,6 +105,8 @@ playerRouter.get('/getPlayer/:id', async (req: Request, res: Response) => {
 });////Get player by id
 
 
+
+
 playerRouter.get('/getallplayers', async (req: Request, res: Response) => {
     try {
         const players = await Player.find({});
