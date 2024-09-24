@@ -1,57 +1,122 @@
 import React, { useEffect, useState } from 'react';
+import Highcharts from 'highcharts/highstock';
+import HighchartsReact from 'highcharts-react-official';
 import { useParams } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+interface AreaGraphData {
+  time: number;
+  value: number;
+  color: string;
+}
 
 const PlayerGraph: React.FC = () => {
-  const { id } = useParams<{ id: string }>();  // Player ID from URL params
-  const [data, setData] = useState<{ time: string; value: number }[]>([]); // Store value history
+  const { id } = useParams<{ id: string }>();
+  const [areaGraphData, setAreaGraphData] = useState<AreaGraphData[]>([]); // Store area graph data
 
   useEffect(() => {
-    // Establish WebSocket connection
-    const socket = new WebSocket('ws://localhost:8080'); // Update with correct WS URL
+    const socket = new WebSocket('ws://localhost:8080');
 
-    // Send playerId to the WebSocket server after connection is established
     socket.onopen = () => {
       console.log(`WebSocket connection established. Sending playerId: ${id}`);
       socket.send(JSON.stringify({ playerId: id }));
     };
 
-    // Handle incoming messages from WebSocket
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-
-      // Only proceed if message contains the correct player ID
       if (message.playerId === id) {
-        // Extract the current value and update the data array
-        setData((prevData) => [
-          ...prevData,
-          { time: new Date().toLocaleTimeString(), value: message.currentValue },
-        ]);
+        const currentValue = message.currentValue;
+        const now = new Date().getTime();
+
+        setAreaGraphData((prevData) => {
+          const updatedData = [...prevData];
+          const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
+
+          // Determine the color (green for rising, red for falling)
+          const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
+
+          updatedData.push({
+            time: now,
+            value: currentValue,
+            color,
+          });
+
+          return updatedData;
+        });
       }
     };
 
-    // Clean up WebSocket connection on unmount
     return () => {
       socket.close();
     };
   }, [id]);
 
+  const options = {
+    chart: {
+      type: 'area',
+      backgroundColor: '#181818', // Dark background
+    },
+    title: {
+      text: 'Player Value Over Time',
+      style: { color: '#ffffff' },
+    },
+    yAxis: {
+      title: {
+        text: 'Value',
+        style: { color: '#ffffff' },
+      },
+      gridLineColor: '#444',
+      labels: {
+        style: {
+          color: '#ffffff',
+        },
+      },
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: {
+        style: {
+          color: '#ffffff',
+        },
+      },
+    },
+    tooltip: {
+      shared: true,
+      style: {
+        color: '#ffffff',
+      },
+    },
+    plotOptions: {
+      area: {
+        fillOpacity: 0.5,
+        marker: {
+          enabled: false,
+        },
+        threshold: null,
+      },
+    },
+    series: [
+      {
+        name: 'Player Value',
+        data: areaGraphData.map(({ time, value }) => [time, value]),
+        color: '#1e90ff',
+        zones: areaGraphData.map(({ value, color }, index) => ({
+          value: value,
+          color: color, // Color transitions depending on rise or fall
+        })),
+        fillColor: {
+          linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+          stops: [
+            [0, 'rgba(0, 255, 0, 0.5)'], // Green for rising areas
+            [1, 'rgba(255, 0, 0, 0.5)'], // Red for falling areas
+          ],
+        },
+      },
+    ],
+  };
+
   return (
-    <div className='flex w-screen'>
-      <h2>Player Value Over Time</h2>
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart
-          data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis domain={['auto', 'auto']} />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="flex w-screen bg-dark text-white p-5">
+      <HighchartsReact highcharts={Highcharts} options={options} />
     </div>
   );
 };
