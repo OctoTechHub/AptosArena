@@ -131,7 +131,7 @@ wss.on('connection', (ws) => {
         }
         await simulatePlayerAction(playerId);
         await broadcastMatchState(ws, playerId);
-      }, 2000); // Simulate events every 2 seconds
+      }, 10000); // Simulate events every 2 seconds
 
       // Clear interval on connection close
       ws.on('close', () => {

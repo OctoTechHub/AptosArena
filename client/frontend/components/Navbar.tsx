@@ -29,6 +29,7 @@ const Navbar = () => {
       setShowLogoutPopup(false);
     }, 3000);
   };
+  // const navigate=useNavigate();
 
   return (
     <>
@@ -42,7 +43,7 @@ const Navbar = () => {
           {/* Navigation Links */}
           <ul className="flex space-x-6 text-white">
             <li><a href="#transfer" className="hover:text-gray-400">Transfer</a></li>
-            <li><a href="#player-live" className="hover:text-gray-400">Player Live</a></li>
+            <li><p onClick={()=>{navigate("/")}} className="hover:text-gray-400">Player Live</p></li>
             <li><a href="#all-players" className="hover:text-gray-400">All Players</a></li>
           </ul>
 

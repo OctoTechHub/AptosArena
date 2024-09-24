@@ -1,9 +1,11 @@
 "use client";
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./AllPlayers.css";
+import { Navigate, useNavigate } from "react-router-dom";
 
 interface Player {
+  _id:string;
   firstName: string;
   lastName: string;
   nationality: string;
@@ -17,7 +19,7 @@ const AllPlayers = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const navigate=useNavigate();
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -32,6 +34,9 @@ const AllPlayers = () => {
 
     fetchPlayers();
   }, []);
+  const navigatetoGraph=(playerId:string)=>{
+    navigate(`/player/${playerId}`);
+  }
 
   if (loading) return <p className="text-center text-white">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -43,14 +48,14 @@ const AllPlayers = () => {
         <table className="min-w-full bg-gray-800 text-white rounded-lg shadow-lg border border-gray-700">
           <thead>
             <tr className="bg-gray-700 text-left">
-              <th className="px-6 py-3">Image</th> 
+              <th className="px-6 py-3">Image</th>
               <th className="px-6 py-3">First Name</th>
               <th className="px-6 py-3">Last Name</th>
               <th className="px-6 py-3">Nationality</th>
               <th className="px-6 py-3">Role</th>
               <th className="px-6 py-3">Value</th>
               <th className="px-6 py-3">Quantity</th>
-              <th className="px-6 py-3">Actions</th>
+              <th className="px-8 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -69,6 +74,9 @@ const AllPlayers = () => {
                 <td className="px-6 py-4">{player.role}</td>
                 <td className="px-6 py-4">{player.value} APT</td>
                 <td className="px-6 py-4">{player.quantity}</td>
+                <td className="px-6 py-4 ">
+                  <button className="px-4 py-2 bg-white text-black" onClick={()=>{navigatetoGraph(player._id)}}>SEE LIVE CHARTS</button>
+                </td>
                 <td className="px-6 py-4">
                   <div className="flex gap-4">
                     <button className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors duration-300 focus:outline-none">
