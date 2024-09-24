@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "npx tsc -b && nodemon build/index.js",
+    "websocket":"tsc -b && node build/match.js",
+
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
