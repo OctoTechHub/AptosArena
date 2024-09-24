@@ -41,11 +41,17 @@ userRouter.post('/signin', (req, res) => __awaiter(void 0, void 0, void 0, funct
         <p><strong>Private Key (Hashed):</strong> ${user.privateKey}</p>
     `);
 }));
-userRouter.get('/generateAccount', (req, res) => {
+userRouter.get('/generateAccount', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const account = ts_sdk_1.Account.generate({
         scheme: ts_sdk_1.SigningSchemeInput.Ed25519,
         legacy: false,
     });
+    //save accout to db
+    const newUser = new db_1.User({
+        publicKey: account.publicKey,
+        privateKey: account.privateKey,
+    });
+    yield newUser.save();
     console.log('Generated Account:');
     console.log(`Public Key: ${account.publicKey}`);
     console.log(`Private Key: ${account.privateKey}`);
@@ -54,5 +60,5 @@ userRouter.get('/generateAccount', (req, res) => {
         <p><strong>Public Key:</strong> ${account.publicKey}</p>
         <p><strong>Private Key:</strong> ${account.privateKey}</p>
     `);
-});
+}));
 exports.default = userRouter;

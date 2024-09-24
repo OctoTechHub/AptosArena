@@ -10,9 +10,11 @@ const Signin = () => {
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [isLoginSuccess, setIsLoginSuccess] = useState(false);  // State for login success message
 
   const navigate = useNavigate();
 
+  // Function to handle account generation
   const handleGenerateKeys = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/user/generateAccount');
@@ -29,6 +31,7 @@ const Signin = () => {
     }
   };
 
+  // Function to handle sign-in
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
     const publicKey = (document.getElementById('publicKey') as HTMLInputElement).value;
@@ -37,13 +40,23 @@ const Signin = () => {
     try {
       const response = await axios.post('http://localhost:3000/api/user/signin', { publicKey, privateKey });
       if (response.status === 200) {
-        navigate('/');
+        // Save keys to localStorage
+        localStorage.setItem('publicKey', publicKey);
+        localStorage.setItem('privateKey', privateKey);
+
+        // Show login success popup
+        setIsLoginSuccess(true);
+        setShowPopup(true);
+        setTimeout(() => {
+          navigate('/');  // Redirect after successful login
+        }, 2000);  // Redirect after 2 seconds
       }
     } catch (error) {
       console.error('Error signing in:', error);
     }
   };
 
+  // Copy key to clipboard
   const handleCopyToClipboard = (key: string | null) => {
     if (key) {
       navigator.clipboard.writeText(key);
@@ -99,6 +112,7 @@ const Signin = () => {
           </div>
         </div>
 
+        {/* Popup for generated keys or login success */}
         {showPopup && (
           <div className="fixed right-0 top-0 h-full w-1/3 bg-gray-800 bg-opacity-70 flex flex-col justify-center items-center z-50 p-4">
             <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-xs border border-gray-600 relative">
@@ -108,34 +122,44 @@ const Signin = () => {
               >
                 &times;
               </button>
-              <h1 className="text-3xl font-bold text-white mb-4">Generated Keys</h1>
-              <div className="bg-gray-700 p-4 rounded-lg mb-4">
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
-                    <strong>Public Key:</strong> {publicKey}
-                  </p>
-                  <div
-                    className="flex items-center bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition"
-                    onClick={() => handleCopyToClipboard(publicKey)}
-                  >
-                    <FontAwesomeIcon icon={faCopy} className="text-white" />
+              <h1 className="text-3xl font-bold text-white mb-4">
+                {isLoginSuccess ? 'Login Successful' : 'Generated Keys'}
+              </h1>
+
+              {!isLoginSuccess && (
+                <div className="bg-gray-700 p-4 rounded-lg mb-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
+                      <strong>Public Key:</strong> {publicKey}
+                    </p>
+                    <div
+                      className="flex items-center bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition"
+                      onClick={() => handleCopyToClipboard(publicKey)}
+                    >
+                      <FontAwesomeIcon icon={faCopy} className="text-white" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
+                      <strong>Private Key:</strong> {privateKey}
+                    </p>
+                    <div
+                      className="flex items-center bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition"
+                      onClick={() => handleCopyToClipboard(privateKey)}
+                    >
+                      <FontAwesomeIcon icon={faCopy} className="text-white" />
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
-                    <strong>Private Key:</strong> {privateKey}
-                  </p>
-                  <div
-                    className="flex items-center bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition"
-                    onClick={() => handleCopyToClipboard(privateKey)}
-                  >
-                    <FontAwesomeIcon icon={faCopy} className="text-white" />
-                  </div>
-                </div>
-              </div>
+              )}
+
+              {isLoginSuccess && (
+                <p className="text-white text-lg">You have successfully logged in!</p>
+              )}
+
               <button
                 onClick={() => setShowPopup(false)}
-                className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-800 transition"
+                className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-800 transition mt-4"
               >
                 Close
               </button>

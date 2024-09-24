@@ -31,12 +31,17 @@ userRouter.post('/signin', async (req: Request, res: Response) => {
         <p><strong>Private Key (Hashed):</strong> ${user.privateKey}</p>
     `);
 });
-userRouter.get('/generateAccount', (req: Request, res: Response) => {
+userRouter.get('/generateAccount', async (req: Request, res: Response) => {
     const account = Account.generate({
         scheme: SigningSchemeInput.Ed25519,
         legacy: false,
     });
-
+    //save accout to db
+    const newUser = new User({
+        publicKey: account.publicKey,
+        privateKey: account.privateKey,
+    });
+    await newUser.save();
     console.log('Generated Account:');
     console.log(`Public Key: ${account.publicKey}`);
     console.log(`Private Key: ${account.privateKey}`);
