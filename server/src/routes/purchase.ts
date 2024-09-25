@@ -168,5 +168,6 @@ purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
     }
 });
 
-
+//have to create a sell router
+purchaseRouter.post('/sell-player', async (req: Request, res: Response) => {});
 export default purchaseRouter;
