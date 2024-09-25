@@ -95,15 +95,18 @@ purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
 
     try {
         // 1. Generate a new seller account
-        const seller = Account.generate({ scheme: SigningSchemeInput.Ed25519, legacy: false });
-        console.log(`Seller's address: ${seller.accountAddress}`);
-
+        if (!process.env.TRANSFER_ACCOUNT_PRIVATE_KEY) {
+            return res.status(500).send('<p>Transfer account not found.</p>');
+        }
+        const sellerPrivateKey = new Ed25519PrivateKey(process.env.TRANSFER_ACCOUNT_PRIVATE_KEY);
+        const seller = Account.fromPrivateKey({ privateKey: sellerPrivateKey });
         // 2. Fund the seller account with 1 APT (for testing purposes)
         await aptos.fundAccount({ accountAddress: seller.accountAddress, amount: ALICE_INITIAL_BALANCE });
 
         // 3. Create an account object for the buyer using their private key
         const buyerPrivateKey = new Ed25519PrivateKey(privateKey);
         const buyer = Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+        
         const buyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
 
         if (buyerBalance == 0) {
