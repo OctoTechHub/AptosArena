@@ -3,6 +3,9 @@ import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
+import Rollingstrip from '@/components/Rollingstrip';
+import { PinContainer } from './../components/ui/3d-pin';
 
 interface AreaGraphData {
   time: number;
@@ -29,19 +32,18 @@ interface PlayerStats {
 }
 
 const PlayerGraph: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Get player ID from URL params
-  const [areaGraphData, setAreaGraphData] = useState<AreaGraphData[]>([]); // Store area graph data
-  const [player, setPlayer] = useState<Player | null>(null); // Store player data
-  const [stats, setStats] = useState<PlayerStats | null>(null); // Store player stats
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+  const { id } = useParams<{ id: string }>();
+  const [areaGraphData, setAreaGraphData] = useState<AreaGraphData[]>([]);
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [stats, setStats] = useState<PlayerStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch player data from API
     const fetchPlayer = async () => {
       try {
         const response = await axios.get(`http://localhost:3000/api/player/getPlayer/${id}`);
-        setPlayer(response.data); // Store player data in state
+        setPlayer(response.data);
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch player data');
@@ -51,29 +53,22 @@ const PlayerGraph: React.FC = () => {
 
     fetchPlayer();
 
-    // WebSocket connection for real-time data updates
     const socket = new WebSocket('ws://localhost:8080');
-
     socket.onopen = () => {
-      console.log(`WebSocket connection established. Sending playerId: ${id}`);
       socket.send(JSON.stringify({ playerId: id }));
     };
 
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-
       if (message.playerId === id) {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
 
-        // Update area graph data with new value
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
 
-          // Determine the color (green for rising, red for falling)
           const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
-
           updatedData.push({
             time: now,
             value: currentValue,
@@ -83,29 +78,28 @@ const PlayerGraph: React.FC = () => {
           return updatedData;
         });
 
-        // Update player stats
-        setStats(message.stats); // Set the real-time stats received from WebSocket
+        setStats(message.stats);
       }
     };
 
     return () => {
-      socket.close(); // Close WebSocket connection when component unmounts
+      socket.close();
     };
   }, [id]);
 
   const options = {
     chart: {
       type: 'area',
-      backgroundColor: '#181818', // Dark background
+      backgroundColor: '#181818',
     },
     title: {
       text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
-      style: { color: '#ffffff' },
+      style: { color: '#ffffff', fontWeight: 'bold', fontSize: '20px' },
     },
     yAxis: {
       title: {
         text: 'Value',
-        style: { color: '#ffffff' },
+        style: { color: '#ffffff', fontSize: '14px' },
       },
       gridLineColor: '#444',
       labels: {
@@ -142,15 +136,15 @@ const PlayerGraph: React.FC = () => {
         name: 'Player Value',
         data: areaGraphData.map(({ time, value }) => [time, value]),
         color: '#1e90ff',
-        zones: areaGraphData.map(({ value, color }, index) => ({
+        zones: areaGraphData.map(({ value, color }) => ({
           value: value,
-          color: color, // Color transitions depending on rise or fall
+          color: color,
         })),
         fillColor: {
           linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
           stops: [
-            [0, 'rgba(0, 255, 0, 0.5)'], // Green for rising areas
-            [1, 'rgba(255, 0, 0, 0.5)'], // Red for falling areas
+            [0, 'rgba(0, 255, 0, 0.5)'],
+            [1, 'rgba(255, 0, 0, 0.5)'],
           ],
         },
       },
@@ -158,60 +152,70 @@ const PlayerGraph: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="w-full max-w-4xl p-5 rounded-lg bg-gray-800 shadow-lg">
-        {loading ? (
-          <div className="text-xl">Loading player data...</div>
-        ) : error ? (
-          <div className="text-xl text-red-500">{error}</div>
-        ) : (
-          <div>
-            {/* Display Player Info */}
-            <div className="flex items-center mb-8 space-x-4">
-              <img
-                src={player?.imageUrl}
-                alt={player?.playerName}
-                className="w-24 h-24 rounded-full shadow-md"
-              />
-              <div>
-                <h2 className="text-2xl font-bold">
-                  {player?.firstName} {player?.lastName}
-                </h2>
-                <p className="text-lg text-gray-400">
-                  {player?.role} - {player?.nationality}
-                </p>
-                <p className="text-lg font-semibold">Value: {player?.value}</p>
+    <>
+      <Navbar />
+      <Rollingstrip />
+      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white w-full">
+        <div className="w-full max-w-6xl p-10 rounded-lg bg-gray-800 shadow-xl">
+          {loading ? (
+            <div className="text-2xl font-medium">Loading player data...</div>
+          ) : error ? (
+            <div className="text-2xl text-red-500 font-semibold">{error}</div>
+          ) : (
+            <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
+              {/* Left Side - Player Card */} 
+              <div className="flex-shrink-0">
+                <PinContainer title={`${player?.firstName} ${player?.lastName}`}>
+                  <div className="flex flex-col items-center p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[22rem] h-auto">
+                    <img
+                      src={player?.imageUrl}
+                      alt={player?.playerName}
+                      className="rounded-full h-28 w-28 mb-4 object-cover border-4 border-gray-700"
+                    />
+                    <h3 className="font-semibold text-2xl text-center text-white mb-4">
+                      {player?.firstName} {player?.lastName}
+                    </h3>
+                    <div className="text-md text-center text-gray-300 mb-4 space-y-2">
+                      <p className="font-medium">
+                        Nationality: <span className="text-white">{player?.nationality}</span>
+                      </p>
+                      <p className="font-medium">
+                        Role: <span className="text-white">{player?.role}</span>
+                      </p>
+                      <p className="font-medium">
+                        Value: <span className="text-white">${player?.value}</span>
+                      </p>
+                    </div>
+                  </div>
+                </PinContainer>
+                
+                {/* Real-time Stats */} 
+                <div className="grid grid-cols-2 gap-8 mt-[25%]">
+                  {[
+                    { label: 'Runs', value: stats?.runs || 0 },
+                    { label: 'Balls Faced', value: stats?.ballsFaced || 0 },
+                    { label: 'Wickets', value: stats?.wickets || 0 },
+                    { label: 'Overs Bowled', value: stats?.oversBowled || 0 },
+                  ].map((stat, index) => (
+                    <div key={index} className="p-6 bg-gray-700 rounded-lg shadow-lg">
+                      <h3 className="text-lg font-medium mb-2">{stat.label}</h3>
+                      <p className="text-2xl font-semibold text-white">{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Display Real-time Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="p-4 bg-gray-700 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold">Runs</h3>
-                <p className="text-xl">{stats?.runs || 0}</p>
-              </div>
-              <div className="p-4 bg-gray-700 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold">Balls Faced</h3>
-                <p className="text-xl">{stats?.ballsFaced || 0}</p>
-              </div>
-              <div className="p-4 bg-gray-700 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold">Wickets</h3>
-                <p className="text-xl">{stats?.wickets || 0}</p>
-              </div>
-              <div className="p-4 bg-gray-700 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold">Overs Bowled</h3>
-                <p className="text-xl">{stats?.oversBowled || 0}</p>
+              {/* Right Side - Graph */} 
+              <div className="flex-1 space-y-8">
+                <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
+                  <HighchartsReact highcharts={Highcharts} options={options} />
+                </div>
               </div>
             </div>
-
-            {/* Render Graph */}
-            <div className="bg-gray-700 rounded-lg p-5 shadow-md">
-              <HighchartsReact highcharts={Highcharts} options={options} />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

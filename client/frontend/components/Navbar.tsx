@@ -29,36 +29,43 @@ const Navbar = () => {
       setShowLogoutPopup(false);
     }, 3000);
   };
-  // const navigate=useNavigate();
 
   return (
     <>
-      <nav className="bg-gray-800 p-4 w-full">
-        <div className="flex justify-between items-center">
+      <nav className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-4 shadow-md w-full">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo */}
-          <div className="text-white text-2xl font-bold">
+          <div className="text-white text-3xl font-extrabold tracking-wide">
             CrickTrade
           </div>
 
           {/* Navigation Links */}
-          <ul className="flex space-x-6 text-white">
-            <li><a href="#transfer" className="hover:text-gray-400">Transfer</a></li>
-            <li><p onClick={()=>{navigate("/")}} className="hover:text-gray-400">Player Live</p></li>
-            <li><a href="#all-players" className="hover:text-gray-400">All Players</a></li>
+          <ul className="flex space-x-8 text-white font-medium">
+            <li className="transition transform hover:scale-105">
+              <a href="#transfer" className="hover:text-blue-400 transition-colors duration-300">Transfer</a>
+            </li>
+            <li className="transition transform hover:scale-105">
+              <p onClick={() => { navigate("/") }} className="hover:text-blue-400 cursor-pointer transition-colors duration-300">
+                Player Live
+              </p>
+            </li>
+            <li className="transition transform hover:scale-105">
+              <a href="#all-players" className="hover:text-blue-400 transition-colors duration-300">All Players</a>
+            </li>
           </ul>
 
           {/* Conditional Sign In/Log Out Button */}
           {isLoggedIn ? (
             <button
               onClick={handleLogout}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+              className="bg-red-500 text-white px-5 py-2 rounded-full shadow-lg hover:bg-red-600 transition-transform duration-300 transform hover:scale-105 focus:outline-none"
             >
               Log Out
             </button>
           ) : (
             <button
               onClick={handleSignIn}
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+              className="bg-blue-500 text-white px-5 py-2 rounded-full shadow-lg hover:bg-blue-600 transition-transform duration-300 transform hover:scale-105 focus:outline-none"
             >
               Sign In
             </button>
@@ -68,7 +75,7 @@ const Navbar = () => {
 
       {/* Logout Successful Popup */}
       {showLogoutPopup && (
-        <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg">
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in-out">
           Logout Successful!
         </div>
       )}

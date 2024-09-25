@@ -2,24 +2,25 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./AllPlayers.css";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface Player {
-  _id:string;
+  _id: string;
   firstName: string;
   lastName: string;
   nationality: string;
   role: string;
   value: number;
   quantity: number;
-  imageUrl: string; // Add this line
+  imageUrl: string;
 }
 
 const AllPlayers = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -34,9 +35,10 @@ const AllPlayers = () => {
 
     fetchPlayers();
   }, []);
-  const navigatetoGraph=(playerId:string)=>{
+
+  const navigatetoGraph = (playerId: string) => {
     navigate(`/player/${playerId}`);
-  }
+  };
 
   if (loading) return <p className="text-center text-white">Loading...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -74,18 +76,16 @@ const AllPlayers = () => {
                 <td className="px-6 py-4">{player.role}</td>
                 <td className="px-6 py-4">{player.value} APT</td>
                 <td className="px-6 py-4">{player.quantity}</td>
-                <td className="px-6 py-4 ">
-                  <button className="px-4 py-2 bg-white text-black" onClick={()=>{navigatetoGraph(player._id)}}>SEE LIVE CHARTS</button>
-                </td>
                 <td className="px-6 py-4">
-                  <div className="flex gap-4">
-                    <button className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors duration-300 focus:outline-none">
-                      Buy
-                    </button>
-                    <button className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors duration-300 focus:outline-none">
-                      Sell
-                    </button>
-                  </div>
+                <button
+  className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md border border-blue-500 hover:bg-gray-700 hover:text-blue-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+  onClick={() => {
+    navigatetoGraph(player._id);
+  }}
+>
+  SEE LIVE CHARTS
+</button>
+
                 </td>
               </tr>
             ))}
