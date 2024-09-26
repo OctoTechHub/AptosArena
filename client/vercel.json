@@ -1,6 +1,0 @@
-{
-  "scripts": {
-    "install-deps": "npm install --force",
-    "build": "npm run install-deps && tsc && vite build"
-  }
-}
