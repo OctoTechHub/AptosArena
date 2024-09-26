@@ -1,16 +1,14 @@
-
 FROM node:20-bullseye
 
 WORKDIR /usr/src/app
 
-COPY package.json pnpm-lock.yaml ./
-
+COPY package.json pnpm-lock.yaml tsconfig.json ./ 
+COPY src/ ./src/   
 RUN npm install -g pnpm
 
 RUN pnpm install
-RUN pnpm run websocket
 COPY build/ ./build/
 
 EXPOSE 3000
-
-CMD ["node", "build/index.js"]
+EXPOSE 343
+CMD ["sh", "-c", "pnpm run websocket & pnpm start"]
