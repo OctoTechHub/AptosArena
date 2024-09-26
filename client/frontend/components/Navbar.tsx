@@ -5,11 +5,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [showLoginRequiredPopup, setShowLoginRequiredPopup] = useState(false); // New state for login-required popup
 
   // Check if privateKey is in localStorage
   useEffect(() => {
     const privateKey = localStorage.getItem('privateKey');
-    setIsLoggedIn(!!privateKey); // Set logged in state based on presence of privateKey
+    setIsLoggedIn(!!privateKey); // Set logged-in state based on presence of privateKey
   }, []);
 
   // Handle sign-in redirection
@@ -22,12 +23,25 @@ const Navbar = () => {
     localStorage.removeItem('privateKey'); // Remove privateKey from localStorage
     setIsLoggedIn(false); // Update the state
     setShowLogoutPopup(true); // Show the popup
-    navigate('/'); // Redirect to home page after logging out
+    navigate('/'); // Redirect to the home page after logging out
 
     // Automatically hide the popup after 3 seconds
     setTimeout(() => {
       setShowLogoutPopup(false);
     }, 3000);
+  };
+
+  // Handle navigation to the Portfolio page
+  const handlePortfolioClick = () => {
+    if (isLoggedIn) {
+      navigate('/profile'); // Allow navigation to the Portfolio page if logged in
+    } else {
+      setShowLoginRequiredPopup(true); // Show the login required popup if not logged in
+      setTimeout(() => {
+        setShowLoginRequiredPopup(false);
+        navigate('/signin'); // Redirect to the sign-in page after showing the popup
+      }, 3000); // Show the popup for 3 seconds
+    }
   };
 
   return (
@@ -42,15 +56,25 @@ const Navbar = () => {
           {/* Navigation Links */}
           <ul className="flex space-x-8 text-white font-medium">
             <li className="transition transform hover:scale-105">
-              <a href="#transfer" className="hover:text-blue-400 transition-colors duration-300">Transfer</a>
+              <p
+                onClick={handlePortfolioClick} // Handle the portfolio link click
+                className="hover:text-blue-400 cursor-pointer transition-colors duration-300"
+              >
+                Portfolio
+              </p>
             </li>
             <li className="transition transform hover:scale-105">
-              <p onClick={() => { navigate("/") }} className="hover:text-blue-400 cursor-pointer transition-colors duration-300">
+              <p
+                onClick={() => { navigate("/") }}
+                className="hover:text-blue-400 cursor-pointer transition-colors duration-300"
+              >
                 Player Live
               </p>
             </li>
             <li className="transition transform hover:scale-105">
-              <a href="#all-players" className="hover:text-blue-400 transition-colors duration-300">All Players</a>
+              <a href="#all-players" className="hover:text-blue-400 transition-colors duration-300">
+                All Players
+              </a>
             </li>
           </ul>
 
@@ -77,6 +101,13 @@ const Navbar = () => {
       {showLogoutPopup && (
         <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in-out">
           Logout Successful!
+        </div>
+      )}
+
+      {/* Login Required Popup */}
+      {showLoginRequiredPopup && (
+        <div className="fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in-out">
+          Login Required!
         </div>
       )}
     </>
