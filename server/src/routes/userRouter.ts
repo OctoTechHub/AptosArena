@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { Account, SigningSchemeInput } from '@aptos-labs/ts-sdk';
 const userRouter = express.Router();
-import { User } from '../db';
+import { Player, User } from '../db';
 userRouter.post('/signin', async (req: Request, res: Response) => {
     const { publicKey, privateKey } = req.body;
 
