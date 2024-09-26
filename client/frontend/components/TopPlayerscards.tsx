@@ -18,7 +18,7 @@ const TopPlayerscards = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/player/getallplayers');
+        const response = await axios.get('https://cricktrade-server.azurewebsites.net/api/player/getallplayers');
         setPlayers(response.data); // Assuming the API returns an array of players
       } catch (error) {
         console.error('Error fetching player data:', error);

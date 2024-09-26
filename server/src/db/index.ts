@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 async function connectToDatabase() {
     try {
         await mongoose.connect('mongodb+srv://krishsoni:2203031050659@paytm.aujjoys.mongodb.net/aptos_users');
-        console.log('Connected to MongoDB');
+        console.log('Connected to CrickDB');
     } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
+        console.error('Error connecting to CrickDB:', error);
     }
 }
 

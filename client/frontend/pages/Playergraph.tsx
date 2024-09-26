@@ -43,7 +43,7 @@ const PlayerGraph: React.FC = () => {
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/player/getPlayer/${id}`);
+        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/player/getPlayer/${id}`);
         setPlayer(response.data);
         setCurrentPlayerValue(response.data.value); // Set initial player value
         setLoading(false);
@@ -152,7 +152,9 @@ const PlayerGraph: React.FC = () => {
       style: {
         color: '#ffffff',
       },
+
       pointFormat: '<span style="color: {series.color}">●</span> Value: <b>{point.y}</b><br/>Time: {point.x:%Y-%m-%d %H:%M:%S}',
+
     },
     plotOptions: {
       area: {
