@@ -42,7 +42,7 @@ const PlayerGraph: React.FC = () => {
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/player/getPlayer/${id}`);
+        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/player/getPlayer/${id}`);
         setPlayer(response.data);
         setLoading(false);
       } catch (err) {

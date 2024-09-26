@@ -21,7 +21,7 @@ export function AnimatedPinDemo() {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/player/getallplayers");
+        const response = await axios.get("https://cricktrade-server.azurewebsites.net/api/player/getallplayers");
         const sortedPlayers = response.data.sort((a: Player, b: Player) => b.value - a.value); // Sort players by value in descending order
         setPlayers(sortedPlayers.slice(0, 3)); // Get the top 3 players
       } catch (error) {
@@ -65,14 +65,7 @@ export function AnimatedPinDemo() {
                 </div>
               </div>
               {/* Buy Now button positioned below the card */}
-              <button
-                onClick={() =>
-                  (window.location.href = `https://example.com/buy/${player.firstName}-${player.lastName}`)
-                }
-                className="mt-4 w-[20rem] py-2 bg-green-600 text-white font-semibold rounded-lg shadow-lg hover:bg-green-700 transition-colors duration-300"
-              >
-                Buy Now
-              </button>
+
             </PinContainer>
           ))}
         </div>
