@@ -244,6 +244,14 @@ const PlayerGraph: React.FC = () => {
                 <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
                   <HighchartsReact highcharts={Highcharts} options={options} />
                 </div>
+                <div>
+                  <button
+                    onClick={handleBuy}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+                  >
+                    Buy Player
+                  </button>
+                </div>
               </div>
             </div>
           )}
