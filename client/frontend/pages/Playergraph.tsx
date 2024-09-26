@@ -38,12 +38,14 @@ const PlayerGraph: React.FC = () => {
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPlayerValue, setCurrentPlayerValue] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
         const response = await axios.get(`http://localhost:3000/api/player/getPlayer/${id}`);
         setPlayer(response.data);
+        setCurrentPlayerValue(response.data.value); // Set initial player value
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch player data');
@@ -64,6 +66,7 @@ const PlayerGraph: React.FC = () => {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
 
+        // Update the area graph data
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
@@ -79,6 +82,7 @@ const PlayerGraph: React.FC = () => {
         });
 
         setStats(message.stats);
+        setCurrentPlayerValue(currentValue); // Update player value from WebSocket
       }
     };
 
@@ -118,9 +122,12 @@ const PlayerGraph: React.FC = () => {
     },
     tooltip: {
       shared: true,
+      backgroundColor: '#000000',
+      borderColor: '#ffffff',
       style: {
         color: '#ffffff',
       },
+      pointFormat: `<span style="color: {series.color}">●</span> Value: <b>{point.y}</b><br/>Time: {point.x:%Y-%m-%d %H:%M:%S}`,
     },
     plotOptions: {
       area: {
@@ -183,7 +190,7 @@ const PlayerGraph: React.FC = () => {
                         Role: <span className="text-white">{player?.role}</span>
                       </p>
                       <p className="font-medium">
-                        Value: <span className="text-white">${player?.value}</span>
+                        Value: <span className="text-white">${currentPlayerValue?.toFixed(2)}</span> {/* Real-time value update */}
                       </p>
                     </div>
                   </div>
