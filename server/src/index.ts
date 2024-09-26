@@ -7,7 +7,7 @@ import { connectToDatabase } from './db';
 import purchaseRouter from './routes/purchase';
 const app = express();
 const port = 3000;
-app.use(cors({ origin: ['http://localhost:5173', 'https://cricktrade.vercel.app'] }));
+app.use(cors({ origin: ['http://localhost:5173', 'https://cricktrade.vercel.app','https://aptos-arena.vercel.app'] }));
 
 app.use(express.json());
 
