@@ -12,24 +12,27 @@ const aptos = new Aptos(config);
 const ALICE_INITIAL_BALANCE = 1_000_000_000; // 1 APT in micro-APT
 const TRANSFER_AMOUNT = 100_000; // 0.1 APT in micro-APT (Correct value)
 
-// Route to create a new account
-purchaseRouter.get("/create-account", async (req: Request, res: Response) => {
-    try {
-        const account = Account.generate({
-            scheme: SigningSchemeInput.Ed25519,
-            legacy: false,
-        });
+// Refer userRouter.ts
+// Route to create a new account   
+// purchaseRouter.get("/create-account", async (req: Request, res: Response) => {
+//     try {
+//         const account = Account.generate({
+//             scheme: SigningSchemeInput.Ed25519,
+//             legacy: false,
+//         });
 
-        console.log('Generated Account:');
-        console.log(`Public Key: ${account.publicKey}`);
-        console.log(`Private Key: ${account.privateKey}`);
+//         console.log('Generated Account:');
+//         console.log(`Public Key: ${account.publicKey}`);
+//         console.log(`Private Key: ${account.privateKey}`);
 
-        res.send(`${account.publicKey} ${account.privateKey}`);
-    } catch (error) {
-        console.error('Failed to create account:', error);
-        res.status(500).send('<p>Failed to create account.</p>');
-    }
-});
+//         res.send(`${account.publicKey} ${account.privateKey}`);
+//     } catch (error) {
+//         console.error('Failed to create account:', error);
+//         res.status(500).send('<p>Failed to create account.</p>');
+//     }
+// });
+
+
 
 // Route to fund an account using Aptos Testnet Faucet
 purchaseRouter.post('/fund-account', async (req: Request, res: Response) => {

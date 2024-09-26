@@ -23,23 +23,23 @@ const config = new ts_sdk_1.AptosConfig({ network: APTOS_NETWORK });
 const aptos = new ts_sdk_1.Aptos(config);
 const ALICE_INITIAL_BALANCE = 1000000000; // 1 APT in micro-APT
 const TRANSFER_AMOUNT = 100000; // 0.1 APT in micro-APT (Correct value)
-// Route to create a new account
-purchaseRouter.get("/create-account", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const account = ts_sdk_1.Account.generate({
-            scheme: ts_sdk_1.SigningSchemeInput.Ed25519,
-            legacy: false,
-        });
-        console.log('Generated Account:');
-        console.log(`Public Key: ${account.publicKey}`);
-        console.log(`Private Key: ${account.privateKey}`);
-        res.send(`${account.publicKey} ${account.privateKey}`);
-    }
-    catch (error) {
-        console.error('Failed to create account:', error);
-        res.status(500).send('<p>Failed to create account.</p>');
-    }
-}));
+// Refer userRouter.ts
+// Route to create a new account   
+// purchaseRouter.get("/create-account", async (req: Request, res: Response) => {
+//     try {
+//         const account = Account.generate({
+//             scheme: SigningSchemeInput.Ed25519,
+//             legacy: false,
+//         });
+//         console.log('Generated Account:');
+//         console.log(`Public Key: ${account.publicKey}`);
+//         console.log(`Private Key: ${account.privateKey}`);
+//         res.send(`${account.publicKey} ${account.privateKey}`);
+//     } catch (error) {
+//         console.error('Failed to create account:', error);
+//         res.status(500).send('<p>Failed to create account.</p>');
+//     }
+// });
 // Route to fund an account using Aptos Testnet Faucet
 purchaseRouter.post('/fund-account', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { accountAddress } = req.body;

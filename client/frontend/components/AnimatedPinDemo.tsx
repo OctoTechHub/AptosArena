@@ -21,7 +21,7 @@ export function AnimatedPinDemo() {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/player/getallplayers");
+        const response = await axios.get("https://cricktrade-server.azurewebsites.net/api/player/getallplayers");
         const sortedPlayers = response.data.sort((a: Player, b: Player) => b.value - a.value); // Sort players by value in descending order
         setPlayers(sortedPlayers.slice(0, 3)); // Get the top 3 players
       } catch (error) {

@@ -18,10 +18,10 @@ function connectToDatabase() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield mongoose_1.default.connect('mongodb+srv://krishsoni:2203031050659@paytm.aujjoys.mongodb.net/aptos_users');
-            console.log('Connected to MongoDB');
+            console.log('Connected to CrickDB');
         }
         catch (error) {
-            console.error('Error connecting to MongoDB:', error);
+            console.error('Error connecting to CrickDB:', error);
         }
     });
 }
@@ -34,7 +34,7 @@ const playerSchema = new mongoose_1.default.Schema({
     imageUrl: { type: String },
     nationality: { type: String },
     role: { type: String },
-    playerName: { type: String, unique: true, required: true } // Example field
+    playerName: { type: String, unique: true, required: true }
 });
 const Player = mongoose_1.default.model('Player', playerSchema);
 exports.Player = Player;
