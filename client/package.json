@@ -41,14 +41,9 @@
     "highcharts-react-official": "^3.2.1",
     "lucide-react": "^0.383.0",
     "next": "^14.2.8",
-<<<<<<< HEAD
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
-=======
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
->>>>>>> 68f85c152ebce6b0d5e4f1f751642574067d01c3
     "react-hook-form": "^7.53.0",
     "react-router-dom": "^6.26.2",
     "react-stockcharts": "^0.7.8",
