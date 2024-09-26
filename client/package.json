@@ -6,6 +6,7 @@
   "scripts": {
     "move:init": "node ./scripts/init",
     "move:test": "node ./scripts/move/test",
+    "deploy": "npm install --legacy-peer-deps && vercel",
     "move:compile": "node ./scripts/move/compile",
     "move:publish": "node ./scripts/move/publish",
     "move:upgrade": "node ./scripts/move/upgrade",
