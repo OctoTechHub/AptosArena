@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import Highcharts from 'highcharts/highstock';
-import HighchartsReact from 'highcharts-react-official';
+import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Rollingstrip from '@/components/Rollingstrip';
 import { PinContainer } from './../components/ui/3d-pin';
+import { ChartOptions, Chart, TimeScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
+import 'chartjs-adapter-date-fns';
+
+Chart.register(TimeScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 interface AreaGraphData {
   time: number;
@@ -33,11 +36,25 @@ interface PlayerStats {
 
 const PlayerGraph: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [areaGraphData, setAreaGraphData] = useState<AreaGraphData[]>([]);
+  const [areaGraphData, setAreaGraphData] = useState({
+    labels: [new Date().getTime()], // Initialize with current timestamp
+    datasets: [
+      {
+        label: 'Player Value',
+        data: [0], // Initialize with a placeholder value
+        backgroundColor: 'rgba(0, 255, 0, 0.5)',
+        borderColor: 'rgba(0, 255, 0, 1)',
+        pointBackgroundColor: 'rgba(0, 255, 0, 1)',
+        pointBorderColor: 'rgba(0, 255, 0, 1)',
+        pointBorderWidth: 1,
+      },
+    ],
+  });
   const [player, setPlayer] = useState<Player | null>(null);
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPlayerValue, setCurrentPlayerValue] = useState<number | null>(null);
   const [decrementAmount, setDecrementAmount] = useState<number>(1); // Default decrement amount
 
   useEffect(() => {
@@ -45,6 +62,7 @@ const PlayerGraph: React.FC = () => {
       try {
         const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/player/getPlayer/${id}`);
         setPlayer(response.data);
+        setCurrentPlayerValue(response.data.value);
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch player data');
@@ -56,34 +74,38 @@ const PlayerGraph: React.FC = () => {
 
     const socket = new WebSocket('ws://localhost:8080');
     socket.onopen = () => {
+      console.log('WebSocket connection established');
       socket.send(JSON.stringify({ playerId: id }));
     };
 
     socket.onmessage = (event) => {
+      console.log('WebSocket message received:', event.data);
       const message = JSON.parse(event.data);
       if (message.playerId === id) {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
 
         setAreaGraphData((prevData) => {
-          const updatedData = [...prevData];
-          const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
-
-          const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
-          updatedData.push({
-            time: now,
-            value: currentValue,
-            color,
-          });
-
+          const updatedData = {
+            labels: [...prevData.labels, now],
+            datasets: [
+              {
+                ...prevData.datasets[0],
+                data: [...prevData.datasets[0].data, currentValue],
+              },
+            ],
+          };
+          console.log('Updated Graph Data:', updatedData);
           return updatedData;
         });
 
         setStats(message.stats);
+        setCurrentPlayerValue(currentValue);
       }
     };
 
     return () => {
+      console.log('Closing WebSocket connection');
       socket.close();
     };
   }, [id]);
@@ -92,7 +114,7 @@ const PlayerGraph: React.FC = () => {
     const privateKey = localStorage.getItem('privateKey');
     const publicKey = localStorage.getItem('publicKey');
     let amount = player?.value || 0;
-    amount=Math.round(amount)
+    amount = Math.round(amount)
     if (!privateKey || !publicKey) {
       alert('Please log in to purchase');
       return;
@@ -114,68 +136,43 @@ const PlayerGraph: React.FC = () => {
     }
   };
 
-  const options = {
-    chart: {
-      type: 'area',
-      backgroundColor: '#181818',
-    },
-    title: {
-      text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
-      style: { color: '#ffffff', fontWeight: 'bold', fontSize: '20px' },
-    },
-    yAxis: {
+  useEffect(() => {
+    console.log('Area Graph Data updated:', areaGraphData);
+  }, [areaGraphData]);
+
+  const chartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    plugins: {
       title: {
-        text: 'Value',
-        style: { color: '#ffffff', fontSize: '14px' },
-      },
-      gridLineColor: '#444',
-      labels: {
-        style: {
-          color: '#ffffff',
-        },
+        display: true,
+        text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
       },
     },
-    xAxis: {
-      type: 'datetime',
-      labels: {
-        style: {
-          color: '#ffffff',
+    interaction: {
+      intersect: false,
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'second',
+        },
+        display: true,
+        title: {
+          display: true,
+          text: 'Time',
         },
       },
-    },
-    tooltip: {
-      shared: true,
-      style: {
-        color: '#ffffff',
-      },
-    },
-    plotOptions: {
-      area: {
-        fillOpacity: 0.5,
-        marker: {
-          enabled: false,
+      y: {
+        type: 'linear',
+        display: true,
+        title: {
+          display: true,
+          text: 'Value',
         },
-        threshold: null,
+        min: 0, // Set a minimum value to ensure the chart always shows from 0
       },
     },
-    series: [
-      {
-        name: 'Player Value',
-        data: areaGraphData.map(({ time, value }) => [time, value]),
-        color: '#1e90ff',
-        zones: areaGraphData.map(({ value, color }) => ({
-          value: value,
-          color: color,
-        })),
-        fillColor: {
-          linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
-          stops: [
-            [0, 'rgba(0, 255, 0, 0.5)'],
-            [1, 'rgba(255, 0, 0, 0.5)'],
-          ],
-        },
-      },
-    ],
   };
 
   return (
@@ -210,7 +207,7 @@ const PlayerGraph: React.FC = () => {
                         Role: <span className="text-white">{player?.role}</span>
                       </p>
                       <p className="font-medium">
-                        Value: <span className="text-white">${player?.value}</span>
+                        Value: <span className="text-white">${currentPlayerValue?.toFixed(2)}</span>
                       </p>
                     </div>
                   </div>
@@ -254,7 +251,7 @@ const PlayerGraph: React.FC = () => {
               {/* Right Side - Graph */}
               <div className="flex-1 space-y-8">
                 <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
-                  <HighchartsReact highcharts={Highcharts} options={options} />
+                  <Line options={chartOptions} data={areaGraphData} />
                 </div>
               </div>
             </div>
