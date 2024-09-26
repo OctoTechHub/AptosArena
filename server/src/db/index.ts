@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 async function connectToDatabase() {
     try {
         await mongoose.connect('mongodb+srv://krishsoni:2203031050659@paytm.aujjoys.mongodb.net/aptos_users');
-        console.log('Connected to CrickDB');
+        console.log('Connected to MongoDB');
     } catch (error) {
-        console.error('Error connecting to CrickDB:', error);
+        console.error('Error connecting to MongoDB:', error);
     }
 }
 
@@ -32,6 +32,7 @@ const PlayerHistory = mongoose.model('PlayerHistory', playerHistorySchema);
 const userSchema = new mongoose.Schema({
     publicKey: { type: String, required: true },
     privateKey: { type: String, required: true },
+    stocksOwned: { type: Array, default: [] },
 });
 const User = mongoose.model('User', userSchema);
 
