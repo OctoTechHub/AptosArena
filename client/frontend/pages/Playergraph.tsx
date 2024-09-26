@@ -91,6 +91,30 @@ const PlayerGraph: React.FC = () => {
     };
   }, [id]);
 
+  const handleBuy = async () => {
+    const privateKey = localStorage.getItem('privateKey');
+    const publicKey = localStorage.getItem('publicKey');
+    const amount = currentPlayerValue ? Math.round(currentPlayerValue) : 0; // Round off the amount
+
+    if (!privateKey || !publicKey) {
+      alert('Please log in to purchase');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/purchase/buy-player', {
+        privateKey,
+        publicKey,
+        amount, // Use rounded off amount
+        playerId: id,
+      });
+
+      alert(`Transaction successful! Hash: ${response.data.transactionHash}`);
+    } catch (error) {
+      console.error('Error during purchase:', error);
+      alert('Failed to process the purchase');
+    }
+  };
 
   const options = {
     chart: {
