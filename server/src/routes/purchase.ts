@@ -69,7 +69,7 @@ purchaseRouter.get("/get-balance/:account", async (req: Request, res: Response) 
 // Route to handle the purchase transaction
 purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
     const { privateKey, publicKey, amount, playerId, decrementAmount } = req.body;
-
+    console.log(privateKey, publicKey, amount, playerId, decrementAmount);
     if (!privateKey) {
         return res.status(400).send('<p>Invalid request. Missing private key.</p>');
     }
@@ -125,7 +125,7 @@ purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
         const transaction = await aptos.transferCoinTransaction({
             sender: buyer.accountAddress,
             recipient: seller.accountAddress,
-            amount: amount,
+            amount:  amount,
         });
 
         const pendingTxn = await aptos.signAndSubmitTransaction({ signer: buyer, transaction });
