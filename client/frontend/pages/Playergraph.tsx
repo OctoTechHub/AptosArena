@@ -38,14 +38,13 @@ const PlayerGraph: React.FC = () => {
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPlayerValue, setCurrentPlayerValue] = useState<number | null>(null);
+  const [decrementAmount, setDecrementAmount] = useState<number>(1); // Default decrement amount
 
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
         const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/player/getPlayer/${id}`);
         setPlayer(response.data);
-        setCurrentPlayerValue(response.data.value); // Set initial player value
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch player data');
@@ -66,7 +65,6 @@ const PlayerGraph: React.FC = () => {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
 
-        // Update the area graph data
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
@@ -82,7 +80,6 @@ const PlayerGraph: React.FC = () => {
         });
 
         setStats(message.stats);
-        setCurrentPlayerValue(currentValue); // Update player value from WebSocket
       }
     };
 
@@ -94,8 +91,8 @@ const PlayerGraph: React.FC = () => {
   const handleBuy = async () => {
     const privateKey = localStorage.getItem('privateKey');
     const publicKey = localStorage.getItem('publicKey');
-    const amount = currentPlayerValue ? Math.round(currentPlayerValue) : 0; // Round off the amount
-
+    let amount = player?.value || 0;
+    amount=Math.round(amount)
     if (!privateKey || !publicKey) {
       alert('Please log in to purchase');
       return;
@@ -105,8 +102,9 @@ const PlayerGraph: React.FC = () => {
       const response = await axios.post('http://localhost:3000/api/purchase/buy-player', {
         privateKey,
         publicKey,
-        amount, // Use rounded off amount
+        amount,
         playerId: id,
+        decrementAmount
       });
 
       alert(`Transaction successful! Hash: ${response.data.transactionHash}`);
@@ -147,14 +145,9 @@ const PlayerGraph: React.FC = () => {
     },
     tooltip: {
       shared: true,
-      backgroundColor: '#000000',
-      borderColor: '#ffffff',
       style: {
         color: '#ffffff',
       },
-
-      pointFormat: '<span style="color: {series.color}">●</span> Value: <b>{point.y}</b><br/>Time: {point.x:%Y-%m-%d %H:%M:%S}',
-
     },
     plotOptions: {
       area: {
@@ -217,7 +210,7 @@ const PlayerGraph: React.FC = () => {
                         Role: <span className="text-white">{player?.role}</span>
                       </p>
                       <p className="font-medium">
-                        Value: <span className="text-white">${currentPlayerValue?.toFixed(2)}</span> {/* Real-time value update */}
+                        Value: <span className="text-white">${player?.value}</span>
                       </p>
                     </div>
                   </div>
@@ -237,20 +230,31 @@ const PlayerGraph: React.FC = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* Input for Decrement Amount */}
+                <div className="mb-4 mt-6">
+                  <label className="block text-white mb-2">Decrement Amount</label>
+                  <input
+                    type="number"
+                    className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
+                    value={decrementAmount}
+                    onChange={(e) => setDecrementAmount(Number(e.target.value))}
+                  />
+                </div>
+
+                {/* Buy Button */}
+                <button
+                  onClick={handleBuy}
+                  className="px-6 py-2 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-500 transition duration-300 mt-4"
+                >
+                  Buy Player
+                </button>
               </div>
 
               {/* Right Side - Graph */}
               <div className="flex-1 space-y-8">
                 <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
                   <HighchartsReact highcharts={Highcharts} options={options} />
-                </div>
-                <div>
-                  <button
-                    onClick={handleBuy}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-                  >
-                    Buy Player
-                  </button>
                 </div>
               </div>
             </div>
