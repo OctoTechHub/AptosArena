@@ -38,6 +38,7 @@ const PlayerGraph: React.FC = () => {
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [decrementAmount, setDecrementAmount] = useState<number>(1); // Default decrement amount
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -86,6 +87,34 @@ const PlayerGraph: React.FC = () => {
       socket.close();
     };
   }, [id]);
+
+  const handleBuy = async () => {
+    const privateKey = localStorage.getItem('privateKey');
+    const publicKey = localStorage.getItem('publicKey');
+    let amount = player?.value || 0;
+
+    amount = Math.round(amount);
+
+    if (!privateKey || !publicKey) {
+      alert('Please log in to purchase');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/purchase/buy-player', {
+        privateKey,
+        publicKey,
+        amount,
+        playerId: id,
+        decrementAmount
+      });
+
+      alert(`Transaction successful! Hash: ${response.data.transactionHash}`);
+    } catch (error) {
+      console.error('Error during purchase:', error);
+      alert('Failed to process the purchase');
+    }
+  };
 
   const options = {
     chart: {
@@ -163,7 +192,7 @@ const PlayerGraph: React.FC = () => {
             <div className="text-2xl text-red-500 font-semibold">{error}</div>
           ) : (
             <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
-              {/* Left Side - Player Card */} 
+              {/* Left Side - Player Card */}
               <div className="flex-shrink-0">
                 <PinContainer title={`${player?.firstName} ${player?.lastName}`}>
                   <div className="flex flex-col items-center p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[22rem] h-auto">
@@ -188,8 +217,8 @@ const PlayerGraph: React.FC = () => {
                     </div>
                   </div>
                 </PinContainer>
-                
-                {/* Real-time Stats */} 
+
+                {/* Real-time Stats */}
                 <div className="grid grid-cols-2 gap-8 mt-[25%]">
                   {[
                     { label: 'Runs', value: stats?.runs || 0 },
@@ -205,11 +234,29 @@ const PlayerGraph: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right Side - Graph */} 
+              {/* Right Side - Graph */}
               <div className="flex-1 space-y-8">
                 <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
                   <HighchartsReact highcharts={Highcharts} options={options} />
                 </div>
+
+                {/* Input for Decrement Amount */}
+                <div className="mb-4">
+                  <label className="block text-white mb-2">Decrement Amount</label>
+                  <input
+                    type="number"
+                    className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
+                    value={decrementAmount}
+                    onChange={(e) => setDecrementAmount(parseInt(e.target.value, 10))}
+                  />
+                </div>
+
+                <button
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg text-white font-semibold"
+                  onClick={handleBuy}
+                >
+                  Buy Player
+                </button>
               </div>
             </div>
           )}
