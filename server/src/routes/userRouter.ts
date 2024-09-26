@@ -67,9 +67,10 @@ userRouter.get('/get-stocks/:publicKey', async (req: Request, res: Response) => 
                 const player = await Player.findById(stock.playerId);
                 if (player) {
                     return {
+                        
                         playerId: stock.playerId,
                         quantity: stock.quantity,
-                        value: player.value // Assuming the player's value is stored in the 'value' field
+                        player // Assuming the player's value is stored in the 'value' field
                     };
                 } else {
                     return null;
