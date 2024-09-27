@@ -24,7 +24,7 @@ export const PinContainer = ({
   );
 
   const onMouseEnter = () => {
-    setTransform("translate(-50%,-50%) rotateX(40deg) scale(0.8)");
+    setTransform("translate(-50%,-50%) rotateX(0deg) scale(0.95)");
   };
   const onMouseLeave = () => {
     setTransform("translate(-50%,-50%) rotateX(0deg) scale(1)");
@@ -33,7 +33,7 @@ export const PinContainer = ({
   return (
     <a
       className={cn(
-        "relative group/pin z-50 cursor-pointer",
+        "relative z-50 cursor-pointer",
         containerClassName
       )}
       onMouseEnter={onMouseEnter}

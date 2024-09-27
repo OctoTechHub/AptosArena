@@ -38,7 +38,8 @@ const PlayerGraph: React.FC = () => {
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [decrementAmount, setDecrementAmount] = useState<number>(1); // Default decrement amount
+  const [decrementAmount, setDecrementAmount] = useState<number>(1);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -92,7 +93,7 @@ const PlayerGraph: React.FC = () => {
     const privateKey = localStorage.getItem('privateKey');
     const publicKey = localStorage.getItem('publicKey');
     let amount = player?.value || 0;
-    amount=Math.round(amount)
+    amount = Math.round(amount);
     if (!privateKey || !publicKey) {
       alert('Please log in to purchase');
       return;
@@ -108,11 +109,16 @@ const PlayerGraph: React.FC = () => {
       });
 
       alert(`Transaction successful! Hash: ${response.data.transactionHash}`);
+      setIsDialogOpen(false);
     } catch (error) {
       console.error('Error during purchase:', error);
       alert('Failed to process the purchase');
     }
   };
+
+  const roundNumbers = (value: number) => {
+    return Math.round(value * 100) / 100
+  }
 
   const options = {
     chart: {
@@ -146,8 +152,22 @@ const PlayerGraph: React.FC = () => {
     tooltip: {
       shared: true,
       style: {
-        color: '#ffffff',
+        color: '#99999',
       },
+      formatter: function(this: Highcharts.TooltipFormatterContextObject): string {
+        const point = this.points ? this.points[0] : { x: 0, y: 0 };
+        const date = new Date(point.x ?? 0);
+        const formattedDate = date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        return `<b>${formattedDate}</b><br/>Value: ${Highcharts.numberFormat(point.y ?? 0, 2)} APT`;
+      }
     },
     plotOptions: {
       area: {
@@ -199,7 +219,7 @@ const PlayerGraph: React.FC = () => {
                       alt={player?.playerName}
                       className="rounded-full h-28 w-28 mb-4 object-cover border-4 border-gray-700"
                     />
-                    <h3 className="font-semibold text-2xl text-center text-white mb-4">
+                    <h3 className="font-semibold text-3xl text-center text-white mb-4">
                       {player?.firstName} {player?.lastName}
                     </h3>
                     <div className="text-md text-center text-gray-300 mb-4 space-y-2">
@@ -210,14 +230,68 @@ const PlayerGraph: React.FC = () => {
                         Role: <span className="text-white">{player?.role}</span>
                       </p>
                       <p className="font-medium">
-                        Value: <span className="text-white">${player?.value}</span>
+                        Value: <span className="text-white">{roundNumbers(player?.value ?? 0)} APT</span>
                       </p>
                     </div>
                   </div>
                 </PinContainer>
 
-                {/* Real-time Stats */}
-                <div className="grid grid-cols-2 gap-8 mt-[25%]">
+                {/* Input for Decrement Amount */}
+                <div className="mb-4 mt-16">
+                  <label className="block text-white mb-2 font-semibold">Quantity</label>
+                  <input
+                    type="number"
+                    className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
+                    value={decrementAmount}
+                    onChange={(e) => setDecrementAmount(Number(e.target.value))}
+                  />
+                </div>
+
+                {/* Buy Button */}
+                <button
+                  onClick={() => setIsDialogOpen(true)}
+                  className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors duration-300"
+                >
+                  Buy Player
+                </button>
+
+                {/* Custom Dialog */}
+                {isDialogOpen && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 p-8 rounded-xl max-w-md w-full">
+                      <h2 className="text-2xl font-bold mb-4">Confirm Purchase</h2>
+                      <div className="mb-4 flex flex-col">
+                        <span className='text-lg font-semibold'>Player Name : {player?.firstName} {player?.lastName}</span>
+                        <span className='mt-2'>Value : {roundNumbers(player?.value ?? 0)} APT</span>
+                        <span> Quantity : {decrementAmount}</span>
+                      </div>
+                      <div className="flex justify-end space-x-4">
+                        <button
+                          onClick={() => setIsDialogOpen(false)}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors duration-300"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleBuy}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors duration-300"
+                        >
+                          Confirm Purchase
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Side - Graph */}
+              <div className='w-full'>
+                <div className="flex-1">
+                  <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
+                    <HighchartsReact highcharts={Highcharts} options={options} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-8 mt-10">
                   {[
                     { label: 'Runs', value: stats?.runs || 0 },
                     { label: 'Balls Faced', value: stats?.ballsFaced || 0 },
@@ -229,32 +303,6 @@ const PlayerGraph: React.FC = () => {
                       <p className="text-2xl font-semibold text-white">{stat.value}</p>
                     </div>
                   ))}
-                </div>
-
-                {/* Input for Decrement Amount */}
-                <div className="mb-4 mt-6">
-                  <label className="block text-white mb-2">Decrement Amount</label>
-                  <input
-                    type="number"
-                    className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
-                    value={decrementAmount}
-                    onChange={(e) => setDecrementAmount(Number(e.target.value))}
-                  />
-                </div>
-
-                {/* Buy Button */}
-                <button
-                  onClick={handleBuy}
-                  className="px-6 py-2 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-500 transition duration-300 mt-4"
-                >
-                  Buy Player
-                </button>
-              </div>
-
-              {/* Right Side - Graph */}
-              <div className="flex-1 space-y-8">
-                <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
-                  <HighchartsReact highcharts={Highcharts} options={options} />
                 </div>
               </div>
             </div>
