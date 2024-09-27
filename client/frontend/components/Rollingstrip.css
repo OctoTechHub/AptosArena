@@ -1,15 +1,27 @@
 .rolling-strip {
-    display: flex; /* Ensure all player elements are in a row */
-    animation: roll 20s linear infinite; /* Speed can be adjusted */
-    white-space: nowrap;
+  display: flex;
+  animation: roll 7s linear infinite;
+  white-space: nowrap;
+}
+
+.rolling-strip-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 20px;
+  color: white;
+}
+
+@keyframes roll {
+  0% {
+    transform: translateX(0);
   }
-  
-  @keyframes roll {
-    0% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
+  100% {
+    transform: translateX(-50%);
   }
-  
+}
+
+@media (max-width: 768px) {
+  .rolling-strip {
+    animation-duration: 30s;
+  }
+}

@@ -24,13 +24,20 @@ const Rollingstrip: React.FC = () => {
     fetchPlayers();
   }, []);
 
+  const roundNumbers = (value: number) => {
+    return Math.round(value * 100) / 100;
+  };
+
+  // Duplicate the players array to create a seamless loop
+  const duplicatedPlayers = [...players, ...players];
+
   return (
     <div className="relative w-full bg-gray-900 overflow-hidden">
       <div className="rolling-strip">
-        {players.map((player, index) => (
-          <div key={index} className="flex items-center px-8 text-white space-x-2">
+        {duplicatedPlayers.map((player, index) => (
+          <div key={index} className="rolling-strip-item">
             <span className="font-bold">{`${player.firstName} ${player.lastName}`}</span>
-            <span className="text-green-400">${player.value}</span>
+            <span className="text-green-400 ml-2">${roundNumbers(player.value)}</span>
           </div>
         ))}
       </div>
