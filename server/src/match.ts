@@ -20,7 +20,7 @@ type MatchState = {
 };
 
 // Set up a WebSocket server
-const wss = new WebSocketServer({ port: 343 });
+const wss = new WebSocketServer({ port: 8085 });
 
 // Simulated cricket match data
 let matchState: MatchState = {

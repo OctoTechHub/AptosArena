@@ -10,11 +10,6 @@ import 'chartjs-adapter-date-fns';
 
 Chart.register(TimeScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
-interface AreaGraphData {
-  time: number;
-  value: number;
-  color: string;
-}
 
 interface Player {
   firstName: string;
@@ -72,7 +67,7 @@ const PlayerGraph: React.FC = () => {
 
     fetchPlayer();
 
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket('ws://localhost:8085');
     socket.onopen = () => {
       console.log('WebSocket connection established');
       socket.send(JSON.stringify({ playerId: id }));
