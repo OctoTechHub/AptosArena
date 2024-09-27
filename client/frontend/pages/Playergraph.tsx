@@ -120,83 +120,98 @@ const PlayerGraph: React.FC = () => {
     return Math.round(value * 100) / 100
   }
 
+  const totalValue = (quantity: number, amount: number) => {
+    const finalAmount = roundNumbers(quantity * amount);
+    return finalAmount;
+  }
+
   const options = {
-    chart: {
-      type: 'area',
-      backgroundColor: '#181818',
-    },
+  chart: {
+    type: 'area',
+    backgroundColor: '#181818',
+  },
+  title: {
+    text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
+    style: { color: '#ffffff', fontWeight: 'bold', fontSize: '20px' },
+  },
+  yAxis: {
     title: {
-      text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
-      style: { color: '#ffffff', fontWeight: 'bold', fontSize: '20px' },
+      text: 'Value',
+      style: { color: '#ffffff', fontSize: '14px' },
     },
-    yAxis: {
-      title: {
-        text: 'Value',
-        style: { color: '#ffffff', fontSize: '14px' },
-      },
-      gridLineColor: '#444',
-      labels: {
-        style: {
-          color: '#ffffff',
-        },
-      },
-    },
-    xAxis: {
-      type: 'datetime',
-      labels: {
-        style: {
-          color: '#ffffff',
-        },
-      },
-    },
-    tooltip: {
-      shared: true,
+    gridLineColor: '#444',
+    labels: {
       style: {
-        color: '#99999',
-      },
-      formatter: function(this: Highcharts.TooltipFormatterContextObject): string {
-        const point = this.points ? this.points[0] : { x: 0, y: 0 };
-        const date = new Date(point.x ?? 0);
-        const formattedDate = date.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        });
-        return `<b>${formattedDate}</b><br/>Value: ${Highcharts.numberFormat(point.y ?? 0, 2)} APT`;
-      }
-    },
-    plotOptions: {
-      area: {
-        fillOpacity: 0.5,
-        marker: {
-          enabled: false,
-        },
-        threshold: null,
+        color: '#ffffff',
       },
     },
-    series: [
-      {
-        name: 'Player Value',
-        data: areaGraphData.map(({ time, value }) => [time, value]),
-        color: '#1e90ff',
-        zones: areaGraphData.map(({ value, color }) => ({
-          value: value,
-          color: color,
-        })),
-        fillColor: {
-          linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
-          stops: [
-            [0, 'rgba(0, 255, 0, 0.5)'],
-            [1, 'rgba(255, 0, 0, 0.5)'],
-          ],
-        },
+  },
+  xAxis: {
+    type: 'datetime',
+    labels: {
+      style: {
+        color: '#ffffff',
       },
-    ],
-  };
+    },
+    dateTimeLabelFormats: {
+      millisecond: '%H:%M:%S.%L',
+      second: '%H:%M:%S',
+      minute: '%H:%M',
+      hour: '%H:%M',
+      day: '%e. %b',
+      week: '%e. %b',
+      month: '%b \'%y',
+      year: '%Y'
+    }
+  },
+  tooltip: {
+    shared: true,
+    style: {
+      color: '#99999',
+    },
+    formatter: function (this: Highcharts.TooltipFormatterContextObject): string {
+      const point = this.points ? this.points[0] : { x: 0, y: 0 };
+      const date = new Date(point.x ?? 0);
+      const formattedDate = date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+      return `<b>${formattedDate}</b><br/>Value: ${Highcharts.numberFormat(point.y ?? 0, 2)} APT`;
+    }
+  },
+  plotOptions: {
+    area: {
+      fillOpacity: 0.5,
+      marker: {
+        enabled: false,
+      },
+      threshold: null,
+    },
+  },
+  series: [
+    {
+      name: 'Player Value',
+      data: areaGraphData.map(({ time, value }) => [time, value]),
+      color: '#1e90ff',
+      zones: areaGraphData.map(({ value, color }) => ({
+        value: value,
+        color: color,
+      })),
+      fillColor: {
+        linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+        stops: [
+          [0, 'rgba(0, 255, 0, 0.5)'],
+          [1, 'rgba(255, 0, 0, 0.5)'],
+        ],
+      },
+    },
+  ],
+};
 
   return (
     <>
@@ -263,7 +278,8 @@ const PlayerGraph: React.FC = () => {
                       <div className="mb-4 flex flex-col">
                         <span className='text-lg font-semibold'>Player Name : {player?.firstName} {player?.lastName}</span>
                         <span className='mt-2'>Value : {roundNumbers(player?.value ?? 0)} APT</span>
-                        <span> Quantity : {decrementAmount}</span>
+                        <span>Quantity : {decrementAmount}</span>
+                        <span>Total amount : {totalValue(decrementAmount, player?.value ?? 0)} APT</span>
                       </div>
                       <div className="flex justify-end space-x-4">
                         <button
