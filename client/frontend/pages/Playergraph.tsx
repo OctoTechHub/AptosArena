@@ -55,7 +55,7 @@ const PlayerGraph: React.FC = () => {
 
     fetchPlayer();
 
-    const socket = new WebSocket('wss://localhost:8085');
+    const socket = new WebSocket('wss://aptosarena.onrender.com');
     socket.onopen = () => {
       socket.send(JSON.stringify({ playerId: id }));
     };
@@ -100,7 +100,7 @@ const PlayerGraph: React.FC = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/purchase/buy-player', {
+      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/purchase/buy-player', {
         privateKey,
         publicKey,
         amount,

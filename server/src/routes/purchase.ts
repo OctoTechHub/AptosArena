@@ -72,6 +72,7 @@ purchaseRouter.get("/get-balance/:account", async (req: Request, res: Response) 
 purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
     const { privateKey, publicKey, amount, playerId, decrementAmount } = req.body;
     console.log(privateKey, publicKey, amount, playerId, decrementAmount);
+    
     if (!privateKey) {
         return res.status(400).send('<p>Invalid request. Missing private key.</p>');
     }
@@ -148,6 +149,9 @@ purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
         if (stockIndex !== -1) {
             // Player already exists, increment the quantity
             user.stocksOwned[stockIndex].quantity += decrementAmount;
+
+            // Mark the array as modified
+            user.markModified('stocksOwned');
         } else {
             // Player doesn't exist, add a new entry
             user.stocksOwned.push({ playerId, quantity: decrementAmount });
@@ -169,6 +173,7 @@ purchaseRouter.post('/buy-player', async (req: Request, res: Response) => {
         res.status(500).send(`<p>Failed to process transaction: ${error.message}</p>`);
     }
 });
+
 
 purchaseRouter.post('/addToOrderBook', async (req: Request, res: Response) => {
     const { orderStatus, orderPrice, orderQuantity, playerId, orderType, publicKey, privateKey } = req.body;
