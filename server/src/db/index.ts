@@ -35,5 +35,21 @@ const userSchema = new mongoose.Schema({
     stocksOwned: { type: Array, default: [] },
 });
 const User = mongoose.model('User', userSchema);
+enum OrderStatus {
+    Open = 'open',
+    Close = 'close',
+    Cancel = 'cancel'
+}
 
-export { connectToDatabase, Player, PlayerHistory, User };
+const orderBookSchema = new mongoose.Schema({
+    orderType: { type: String, required: true },
+    playerId: { type: String, required: true },
+    orderPrice: { type: Number, required: true },
+    orderQuantity: { type: Number, required: true },
+    privateKey: { type: String, required: true },
+    orderStatus: { type: String, enum: Object.values(OrderStatus), default: OrderStatus.Open },
+    orderTime: { type: Date, default: Date.now }
+});
+const OrderBook=mongoose.model('OrderBook',orderBookSchema);
+
+export { connectToDatabase, Player, PlayerHistory, User, OrderBook };

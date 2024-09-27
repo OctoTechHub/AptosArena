@@ -1,12 +1,42 @@
-const { Account, SigningSchemeInput, Ed25519PrivateKey } =require('@aptos-labs/ts-sdk');
-// const account = Account.generate({});
-// console.log('Generated Account:',account);
-// console.log(`Public Key: ${account.publicKey}`);
-// console.log(`Private Key: ${account.privateKey}`);
-// 0x7644891333e526065ec7e9a4598dd5b7be93c14e6dbee3ad08114c5a4cae9356
-// 0xa6065a8cdbe5672965e1e2dff76e3c0fbd6e06982fabb46769a48c7b8289dc26
-const privateKey=new Ed25519PrivateKey('0xa6065a8cdbe5672965e1e2dff76e3c0fbd6e06982fabb46769a48c7b8289dc26')
-const derieved_account = Account.fromPrivateKey({ privateKey });
-console.log('Derieved Account:',derieved_account);
-console.log(`Public Key: ${derieved_account.publicKey}`);
-console.log(`Private Key: ${derieved_account.privateKey}`);
+// import WebSocket from 'ws';
+const WebSocket = require('ws');
+// Define the playerId that you want to send to the server
+const playerId = '66e695f44e03e22adaed3347'; // Replace with actual playerId
+
+// Create a WebSocket connection to the server
+const ws = new WebSocket('wss://aptosarena.onrender.com');
+
+// Event listener for when the connection opens
+ws.on('open', () => {
+  console.log('Connected to the server');
+
+  // Send the player's ID to the server
+  ws.send(JSON.stringify({ playerId }));
+
+  console.log(`Player ID ${playerId} sent to the server`);
+});
+
+// Event listener for receiving messages from the server
+ws.on('message', (data) => {
+  // Parse and handle the incoming message
+  const message = JSON.parse(data);
+  console.log('Received data from server:', message);
+
+  if (message.error) {
+    console.error('Error from server:', message.error);
+  } else {
+    const { playerId, stats, currentValue } = message;
+    console.log(`Stats for player ${playerId}:`, stats);
+    console.log(`Current value of player ${playerId}: ${currentValue}`);
+  }
+});
+
+// Event listener for when the connection closes
+ws.on('close', () => {
+  console.log('Disconnected from the server');
+});
+
+// Event listener for errors
+ws.on('error', (error) => {
+  console.error('WebSocket error:', error);
+});
