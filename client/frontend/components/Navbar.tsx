@@ -6,6 +6,7 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showLoginRequiredPopup, setShowLoginRequiredPopup] = useState(false); // New state for login-required popup
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
 
   // Check if privateKey is in localStorage
   useEffect(() => {
@@ -53,8 +54,31 @@ const Navbar = () => {
             CrickTrade
           </div>
 
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-white focus:outline-none"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"}
+                ></path>
+              </svg>
+            </button>
+          </div>
+
           {/* Navigation Links */}
-          <ul className="flex space-x-8 text-white font-medium">
+          <ul className={`md:flex space-x-8 text-white font-medium ${isMenuOpen ? 'block' : 'hidden'} md:block`}>
             <li className="transition transform hover:scale-105">
               <p
                 onClick={handlePortfolioClick} // Handle the portfolio link click
