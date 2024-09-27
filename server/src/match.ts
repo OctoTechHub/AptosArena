@@ -54,10 +54,10 @@ const updatePlayerValue = async (playerId: string, eventType: 'run' | 'out' | 'w
         newValue += runsScored * 0.1; // Increase value by 0.1 for each run scored
         break;
       case 'out':
-        newValue -= 5; // Decrease value by 5 if the player gets out
+        newValue -= 0.5; // Decrease value by 5 if the player gets out
         break;
       case 'wicket':
-        newValue += 15; // Increase value by 15 for each wicket taken
+        newValue += 1; // Increase value by 15 for each wicket taken
         break;
     }
 
@@ -165,7 +165,7 @@ wss.on('connection', (ws) => {
         }
         await simulatePlayerAction(playerId);
         await broadcastMatchState(ws, playerId);
-      }, 10000); // Simulate events every 10 seconds
+      }, 5000); // Simulate events every 10 seconds
 
       // Clear interval on connection close
       ws.on('close', () => {
