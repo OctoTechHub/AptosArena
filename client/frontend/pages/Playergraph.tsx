@@ -52,42 +52,52 @@ const PlayerGraph: React.FC = () => {
         setLoading(false);
       }
     };
-
+  
     fetchPlayer();
-
+  
     const socket = new WebSocket('wss://aptosarena.onrender.com');
     socket.onopen = () => {
       socket.send(JSON.stringify({ playerId: id }));
     };
-
+  
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.playerId === id) {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
-
+  
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
-
+  
           const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
           updatedData.push({
             time: now,
             value: currentValue,
             color,
           });
-
+  
           return updatedData;
         });
-
+  
+        // Update the player's value in real-time
+        setPlayer((prevPlayer) => {
+          if (prevPlayer) {
+            return { ...prevPlayer, value: currentValue };  // Update only the value property
+          }
+          return prevPlayer;
+        });
+  
+        // Update player stats (optional, depending on WebSocket message)
         setStats(message.stats);
       }
     };
-
+  
     return () => {
       socket.close();
     };
   }, [id]);
+  
 
   const handleBuy = async () => {
     const privateKey = localStorage.getItem('privateKey');
