@@ -101,7 +101,7 @@ const simulatePlayerAction = async (playerId: string) => {
     case 'Bowler':
       if (event <= 4) {
         // Bowler bowls a ball, but no runs
-        matchState.players[playerId].oversBowled += 1 / 6;
+        matchState.players[playerId].oversBowled += 1 ;
         console.log(`Bowler ${playerId} bowled an over.`);
       } else if (event === 5) {
         // Bowler takes a wicket
