@@ -38,7 +38,7 @@ const Signin = () => {
     const privateKey = (document.getElementById('privateKey') as HTMLInputElement).value;
 
     try {
-      const response = await axios.post('http://localhost:3000/api/user/signin', { publicKey, privateKey });
+      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/user/signin', { publicKey, privateKey });
       if (response.status === 200) {
         // Save keys to localStorage
         localStorage.setItem('publicKey', publicKey);

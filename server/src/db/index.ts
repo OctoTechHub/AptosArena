@@ -17,7 +17,7 @@ const playerSchema = new mongoose.Schema({
     imageUrl: { type: String },
     nationality: { type: String },
     role: { type: String },
-    playerName: { type: String, unique: true, required: true } // Example field
+    playerName: { type: String, unique: true, required: true } 
 });
 const Player = mongoose.model('Player', playerSchema);
 
