@@ -7,6 +7,7 @@ import Signin from "./pages/Signin";
 // import LivePlayers from "./pages/LivePlayers";
 import Playergraph from "./pages/Playergraph";
 import UserProfile from "./pages/Userprofile";
+import OrderBook from "./pages/OrderBook";
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
             <Route path="/player/:id" element={<Playergraph/>}/>
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<UserProfile/>} />
+            <Route path="/orderBook" element={<OrderBook/>} />
           </Routes>
         </div>
       </BrowserRouter>

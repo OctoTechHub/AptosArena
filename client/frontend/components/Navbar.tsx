@@ -96,8 +96,8 @@ const Navbar = () => {
               </p>
             </li>
             <li className="transition transform hover:scale-105">
-              <a href="#all-players" className="hover:text-blue-400 transition-colors duration-300">
-                All Players
+              <a href="/orderbook" className="hover:text-blue-400 transition-colors duration-300">
+              OrderBook
               </a>
             </li>
           </ul>
