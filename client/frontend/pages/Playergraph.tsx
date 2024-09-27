@@ -54,7 +54,7 @@ const PlayerGraph: React.FC = () => {
 
     fetchPlayer();
 
-    const socket = new WebSocket('ws://localhost:8085');
+    const socket = new WebSocket('wss://localhost:8085');
     socket.onopen = () => {
       socket.send(JSON.stringify({ playerId: id }));
     };
