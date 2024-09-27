@@ -9,7 +9,7 @@ const OrderBook = () => {
     useEffect(()=>{
     const fetchOrderBook = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/purchase/getOrderBook");
+        const response = await axios.get("https://cricktrade-server.azurewebsites.net/api/purchase/getOrderBook");
         setOrderBook(response.data);
         setLoading(false);
       } catch (err) {
