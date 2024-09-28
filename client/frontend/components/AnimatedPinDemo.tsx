@@ -111,7 +111,7 @@ export function AnimatedPinDemo() {
                     onClick={() => {
                       navigatetoGraph(player._id);
                     }}
-                    className="px-6 py-2 bg-green-500 rounded-lg text-white font-semibold hover:bg-blue-500 transition duration-300 mt-4"
+                    className="px-6 py-2 bg-green-500 rounded-lg text-white font-semibold hover:bg-green-400 transition duration-300 mt-4"
                   >
                     Buy Player
                   </button>
