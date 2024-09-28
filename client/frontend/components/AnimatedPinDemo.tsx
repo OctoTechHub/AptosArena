@@ -81,7 +81,7 @@ export function AnimatedPinDemo() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 pl-8 pr-8 pb-8">
           {players.map((player, index) => (
             <div key={index} title={`${player.firstName} ${player.lastName}`}>
-              <div className="flex flex-col bg-gray-900 border border-gray-700 rounded-xl shadow-xl hover:shadow-3xl transition-shadow duration-300 w-[27rem] h-auto">
+              <div className="flex flex-col bg-gray-900 border border-gray-700 rounded-xl shadow-xl hover:shadow-3xl transition-shadow duration-300 w-[27rem] ">
                 <div className="flex flex-row gap-4 items-center pr-4 pl-4 pt-4">
                   <img
                     src={player.imageUrl}
@@ -111,7 +111,7 @@ export function AnimatedPinDemo() {
                     onClick={() => {
                       navigatetoGraph(player._id);
                     }}
-                    className="px-6 py-2 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-500 transition duration-300 mt-4"
+                    className="px-6 py-2 bg-green-500 rounded-lg text-white font-semibold hover:bg-blue-500 transition duration-300 mt-4"
                   >
                     Buy Player
                   </button>

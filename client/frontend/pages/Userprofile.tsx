@@ -106,7 +106,7 @@ const UserProfile: React.FC = () => {
               <div className="mt-8 bg-gray-800 p-8 rounded-lg shadow-lg text-center">
                 <h2 className="text-2xl font-semibold mb-4">Total Asset Worth</h2>
                 <p className="text-xl">
-                  Total Value of Assets: <span className="text-green-400">${totalWorth.toFixed(2)}</span>
+                  Total Value of Assets: <span className="text-green-400">{totalWorth.toFixed(2)} APT</span>
                 </p>
               </div>
 
@@ -130,7 +130,7 @@ const UserProfile: React.FC = () => {
                         Role: <span className="text-white">{stock.player.role}</span>
                       </p>
                       <p>
-                        Value: <span className="text-white">${stock.player.value.toFixed(2)}</span>
+                        Value: <span className="text-white">{stock.player.value.toFixed(2)} APT</span>
                       </p>
                     </div>
                     <div className="text-center text-gray-400">

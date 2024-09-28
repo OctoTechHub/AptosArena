@@ -37,7 +37,7 @@ const Rollingstrip: React.FC = () => {
         {duplicatedPlayers.map((player, index) => (
           <div key={index} className="rolling-strip-item">
             <span className="font-bold">{`${player.firstName} ${player.lastName}`}</span>
-            <span className="text-green-400 ml-2">${roundNumbers(player.value)}</span>
+            <span className="text-green-400 ml-2">{roundNumbers(player.value)} APT</span>
           </div>
         ))}
       </div>

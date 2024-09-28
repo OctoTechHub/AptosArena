@@ -40,6 +40,7 @@ const PlayerGraph: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [decrementAmount, setDecrementAmount] = useState<number>(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [playerQuantity, setPlayerQuantity] = useState<number>(0);
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -52,51 +53,83 @@ const PlayerGraph: React.FC = () => {
         setLoading(false);
       }
     };
-
+  
     fetchPlayer();
-
+  
     const socket = new WebSocket('wss://aptosarena.onrender.com');
     socket.onopen = () => {
       socket.send(JSON.stringify({ playerId: id }));
     };
-
+  
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.playerId === id) {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
-
+  
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
-
+  
           const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
           updatedData.push({
             time: now,
             value: currentValue,
             color,
           });
-
+  
           return updatedData;
         });
-
-        // Update the player's value in real-time
+  
         setPlayer((prevPlayer) => {
           if (prevPlayer) {
-            return { ...prevPlayer, value: currentValue };  // Update only the value property
+            return { ...prevPlayer, value: currentValue }; 
           }
           return prevPlayer;
         });
-
-        // Update player stats (optional, depending on WebSocket message)
+  
+  
         setStats(message.stats);
       }
     };
-
+  
     return () => {
       socket.close();
     };
   }, [id]);
+  
+  useEffect(() => {
+    if (!player) return;
+  
+    const fetchPlayerQuantity = async () => {
+      const publicKey = localStorage.getItem('publicKey');
+      if (!publicKey) {
+        console.log('User not logged in');
+        return;
+      }
+  
+      try {
+        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/user/get-stocks/${publicKey}`);
+        const fetchedStocks = response.data;
+  
+        const playerStock = fetchedStocks.find((stock: any) =>
+          stock.player.firstName === player.firstName &&
+          stock.player.lastName === player.lastName
+        );
+  
+        if (playerStock) {
+          setPlayerQuantity(playerStock.quantity);
+        } else {
+          setPlayerQuantity(0);
+        }
+      } catch (err) {
+        console.error('Failed to fetch player quantity:', err);
+      }
+    };
+  
+    fetchPlayerQuantity();
+  }, [player]); 
+  
 
   const handleBuy = async () => {
     const privateKey = localStorage.getItem('privateKey');
@@ -236,51 +269,67 @@ const PlayerGraph: React.FC = () => {
           ) : error ? (
             <div className="text-2xl text-red-500 font-semibold">{error}</div>
           ) : (
-            <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
+            <div className="flex flex-col lg:flex-row lg:space-x-8">
               {/* Left Side - Player Card */}
-              <div className="flex-shrink-0">
-                <PinContainer title={`${player?.firstName} ${player?.lastName}`}>
-                  <div className="flex flex-col items-center p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[22rem] h-auto">
-                    <img
-                      src={player?.imageUrl}
-                      alt={player?.playerName}
-                      className="rounded-full h-28 w-28 mb-4 object-cover border-4 border-gray-700"
-                    />
-                    <h3 className="font-semibold text-3xl text-center text-white mb-4">
-                      {player?.firstName} {player?.lastName}
-                    </h3>
-                    <div className="text-md text-center text-gray-300 mb-4 space-y-2">
-                      <p className="font-medium">
-                        Nationality: <span className="text-white">{player?.nationality}</span>
-                      </p>
-                      <p className="font-medium">
-                        Role: <span className="text-white">{player?.role}</span>
-                      </p>
-                      <p className="font-medium">
-                        Value: <span className="text-white">{roundNumbers(player?.value ?? 0)} APT</span>
-                      </p>
+              <div className='flex flex-col mt-4'>
+                <div className="flex-shrink-0">
+                  <PinContainer title={`${player?.firstName} ${player?.lastName}`}>
+                    <div className="flex flex-col items-center p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[22rem] h-auto">
+                      <img
+                        src={player?.imageUrl}
+                        alt={player?.playerName}
+                        className="rounded-full h-28 w-28 mb-4 object-cover border-4 border-gray-700"
+                      />
+                      <h3 className="font-semibold text-3xl text-center text-white mb-4">
+                        {player?.firstName} {player?.lastName}
+                      </h3>
+                      <div className="text-md text-center text-gray-300 mb-4 space-y-2">
+                        <p className="font-medium">
+                          Nationality: <span className="text-white">{player?.nationality}</span>
+                        </p>
+                        <p className="font-medium">
+                          Role: <span className="text-white">{player?.role}</span>
+                        </p>
+                        <p className="font-medium">
+                          Value: <span className="text-white">{roundNumbers(player?.value ?? 0)} APT</span>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </PinContainer>
+                  </PinContainer>
 
-                {/* Input for Decrement Amount */}
-                <div className="mb-4 mt-16">
-                  <label className="block text-white mb-2 font-semibold">Quantity</label>
-                  <input
-                    type="number"
-                    className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
-                    value={decrementAmount}
-                    onChange={(e) => setDecrementAmount(Number(e.target.value))}
-                  />
+                  <div className='h-auto w-full border flex flex-col border-gray-700 mt-20 p-4'>
+                    <span className='text-lg font-semibold'>Player Quantity In Your Portfolio</span>
+                    <span className='mt-2'>Quantity : {playerQuantity}</span>
+                    <span>Net value : {totalValue(playerQuantity , player?.value ?? 0)} APT</span>
+                  </div>
+
+                  {/* Input for Decrement Amount */}
+                  <div className="mb-4 mt-8">
+                    <label className="block text-white mb-2 font-semibold">Quantity</label>
+                    <input
+                      type="number"
+                      className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
+                      value={decrementAmount}
+                      onChange={(e) => setDecrementAmount(Number(e.target.value))}
+                    />
+                  </div>
                 </div>
 
-                {/* Buy Button */}
-                <button
-                  onClick={() => setIsDialogOpen(true)}
-                  className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors duration-300"
-                >
-                  Buy Player
-                </button>
+                <div className='flex flex-row w-full gap-4'>
+                  {/* Buy Button */}
+                  <button
+                    onClick={() => setIsDialogOpen(true)}
+                    className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-400 transition-colors duration-300 "
+                  >
+                    Buy Player
+                  </button>
+                  {/* Sell Button */}
+                  <button
+                    onClick={() => setIsDialogOpen(true)}
+                    className="w-full px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-400 transition-colors duration-300">
+                    Sell Player
+                  </button>
+                </div>
 
                 {/* Custom Dialog */}
                 {isDialogOpen && (
@@ -319,14 +368,14 @@ const PlayerGraph: React.FC = () => {
                     <HighchartsReact highcharts={Highcharts} options={options} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-8 mt-10">
+                <div className="grid grid-cols-2 gap-4 mt-8">
                   {[
                     { label: 'Runs', value: stats?.runs || 0 },
                     { label: 'Balls Faced', value: stats?.ballsFaced || 0 },
                     { label: 'Wickets', value: stats?.wickets || 0 },
                     { label: 'Overs Bowled', value: stats?.oversBowled || 0 },
                   ].map((stat, index) => (
-                    <div key={index} className="p-6 bg-gray-700 rounded-lg shadow-lg">
+                    <div key={index} className="p-4 bg-gray-700 rounded-lg shadow-lg">
                       <h3 className="text-lg font-medium mb-2">{stat.label}</h3>
                       <p className="text-2xl font-semibold text-white">{stat.value}</p>
                     </div>
