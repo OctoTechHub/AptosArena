@@ -1,18 +1,8 @@
-<<<<<<< HEAD
-import Navbar from "@/components/Navbar";
-import Rollingstrip from "@/components/Rollingstrip";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { AiOutlineArrowDown, AiOutlineArrowUp } from "react-icons/ai"; // Icons for Buy/Sell
-import { useNavigate } from "react-router-dom";
- // Use for navigation
-=======
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Rollingstrip from '@/components/Rollingstrip';
->>>>>>> 573d4bf (Order book ui changes)
 
 export interface Order {
   _id: string;
@@ -34,11 +24,7 @@ const OrderBook = () => {
   const [orderBook, setOrderBook] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-<<<<<<< HEAD
-  const navigate = useNavigate();
-=======
   const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
->>>>>>> 573d4bf (Order book ui changes)
 
   useEffect(() => {
     const fetchOrderBook = async () => {
