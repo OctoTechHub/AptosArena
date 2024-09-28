@@ -30,6 +30,8 @@ const UserProfile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [roleCounts, setRoleCounts] = useState({ batsmen: 0, bowlers: 0, allRounders: 0 });
   const [totalWorth, setTotalWorth] = useState(0);
+  const [sellOrderLoading, setSellOrderLoading] = useState<boolean>(false);
+  const [sellOrderError, setSellOrderError] = useState<string | null>(null);
 
   useEffect(() => {
     const publicKey = localStorage.getItem('publicKey');
@@ -88,6 +90,35 @@ const UserProfile: React.FC = () => {
     ],
   };
 
+  // Function to handle sell order submission
+  const handleSellOrder = async (playerId: string, orderPrice: number, orderQuantity: number) => {
+    setSellOrderLoading(true);
+    setSellOrderError(null);
+
+    const publicKey = localStorage.getItem('publicKey');
+    const privateKey = localStorage.getItem('privateKey');
+
+    try {
+      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/purchase/addToOrderBook', {
+        orderType: 'sell',
+        playerId,
+        orderPrice,
+        orderQuantity,
+        orderStatus: 'open',
+        publicKey,
+        privateKey
+      });
+      
+      console.log('Order added:', response.data);
+      alert('Order added to the order book successfully!');
+    } catch (error) {
+      console.error('Error adding sell order:', error);
+      setSellOrderError('Failed to add sell order. Please try again.');
+    } finally {
+      setSellOrderLoading(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -137,6 +168,18 @@ const UserProfile: React.FC = () => {
                       <p>
                         Quantity Owned: <span className="text-white">{stock.quantity}</span>
                       </p>
+                    </div>
+
+                    {/* Sell to Orderbook Button */}
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => handleSellOrder(stock.playerId, stock.player.value, stock.quantity)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        disabled={sellOrderLoading}
+                      >
+                        {sellOrderLoading ? 'Processing...' : 'Sell to Orderbook'}
+                      </button>
+                      {sellOrderError && <p className="text-red-400 mt-2">{sellOrderError}</p>}
                     </div>
                   </div>
                 ))}

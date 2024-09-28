@@ -247,9 +247,9 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
         return res.status(400).send('<p>Invalid request. Order not found.</p>');
     }
 
-    const user = await User.findOne({ publicKey });
-    if (!user) {
-        return res.status(400).send('<p>Invalid request. User not found.</p>');
+    const buyer = await User.findOne({ publicKey });
+    if (!buyer) {
+        return res.status(400).send('<p>Invalid request. Buyer not found.</p>');
     }
 
     // Decode the stored privateKey (JWT) from the order
@@ -257,52 +257,79 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
     try {
         const decoded = jwt.verify(order.privateKey, process.env.JWT_SECRET ?? '');  // Verify the token with the same secret
         decodedPrivateKey = (decoded as JwtPayload & { privateKey: string }).privateKey;
+        console.log('Decoded private key:', decodedPrivateKey);
     } catch (error) {
         console.error('Error decoding private key from JWT:', error);
         return res.status(400).send('<p>Invalid request. Could not decode private key.</p>');
     }
 
-    const sellerpvt = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey(decodedPrivateKey) });
-    const seller = Account.fromPrivateKey({ privateKey: sellerpvt.privateKey });
-    console.log(seller.privateKey);
-    const buyerPrivateKey = new Ed25519PrivateKey(privateKey);  // Assuming the buyer provides their raw private key
-    const buyer = Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+    // Fetch seller using the decoded private key
+    const seller = await User.findOne({ privateKey: decodedPrivateKey });
+    if (!seller) {
+        return res.status(400).send('<p>Invalid request. Seller not found.</p>');
+    }
 
-    const buyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
+    const buyerPrivateKey = new Ed25519PrivateKey(privateKey);  // Assuming the buyer provides their raw private key
+    const buyerAccount = Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+    const sellerpvt=new Ed25519PrivateKey(decodedPrivateKey);
+    const sellerAccount=Account.fromPrivateKey({privateKey:sellerpvt});
+
+    const buyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyerAccount.accountAddress });
     if (buyerBalance < order.orderPrice * order.orderQuantity) {
         return res.status(400).send('<p>Buyer account does not have enough funds.</p>');
     }
 
     try {
+        // Perform the transfer transaction
+        console.log("TRANSACTION STARTED")
         const transaction = await aptos.transferCoinTransaction({
-            sender: buyer.accountAddress,
-            recipient: seller.accountAddress,
+            sender: buyerAccount.accountAddress,
+            recipient: sellerAccount.accountAddress,
             amount: Math.round(order.orderPrice) * order.orderQuantity
         });
-        const pendingTxn = await aptos.signAndSubmitTransaction({ signer: buyer, transaction });
+        const pendingTxn = await aptos.signAndSubmitTransaction({ signer: buyerAccount, transaction });
         const response = await aptos.waitForTransaction({ transactionHash: pendingTxn.hash });
         console.log(`Transaction successful: ${response.hash}`);
 
-        const newBuyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyer.accountAddress });
-        const newSellerBalance = await aptos.getAccountAPTAmount({ accountAddress: seller.accountAddress });
+        const newBuyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyerAccount.accountAddress });
+        const newSellerBalance = await aptos.getAccountAPTAmount({ accountAddress: sellerAccount.accountAddress });
 
+        // Update order status to 'closed'
         const orderUpdate = await OrderBook.findByIdAndUpdate(orderId, { orderStatus: 'closed' }, { new: true });
 
-        const stockIndex = user.stocksOwned.findIndex(stock => stock.playerId === order.playerId);
-        if (stockIndex !== -1) {
-            user.stocksOwned[stockIndex].quantity += order.orderQuantity;
+        // Update buyer's stock
+        const buyerStockIndex = buyer.stocksOwned.findIndex(stock => stock.playerId === order.playerId);
+        if (buyerStockIndex !== -1) {
+            buyer.stocksOwned[buyerStockIndex].quantity += order.orderQuantity;
         } else {
-            user.stocksOwned.push({ playerId: order.playerId, quantity: order.orderQuantity });
+            buyer.stocksOwned.push({ playerId: order.playerId, quantity: order.orderQuantity });
         }
+        await buyer.save();
 
-        const userUpdate = await user.save();
+        // Update seller's stock by reducing the quantity or removing the stock if none left
+        const sellerStockIndex = seller.stocksOwned.findIndex(stock => stock.playerId === order.playerId);
+        if (sellerStockIndex !== -1) {
+            if (seller.stocksOwned[sellerStockIndex].quantity >= order.orderQuantity) {
+                seller.stocksOwned[sellerStockIndex].quantity -= order.orderQuantity;
+
+                // Remove the stock if quantity becomes zero
+                if (seller.stocksOwned[sellerStockIndex].quantity === 0) {
+                    seller.stocksOwned.splice(sellerStockIndex, 1);
+                }
+            } else {
+                return res.status(400).send('<p>Seller does not have enough quantity to sell.</p>');
+            }
+        } else {
+            return res.status(400).send('<p>Seller does not own this stock.</p>');
+        }
+        await seller.save();
 
         res.send({
             message: 'Transaction successful',
             transactionHash: response.hash,
             newBuyerBalance,
             newSellerBalance,
-            userUpdate,
+            buyerUpdate: buyer,
             orderUpdate
         });
 
@@ -311,4 +338,5 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
         res.status(500).send(`<p>Failed to process transaction: ${error}</p>`);
     }
 });
+
 export default purchaseRouter;
