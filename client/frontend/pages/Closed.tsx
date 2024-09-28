@@ -17,6 +17,7 @@ const ClosedOrders = () => {
         const response = await axios.get("https://cricktrade-server.azurewebsites.net/api/purchase/getOrderBook");
         const orders = response.data.filter((order: Order) => order.orderStatus === "closed");
         setClosedOrders(orders);
+        console.log(closedOrders)
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch closed order data");
@@ -40,7 +41,7 @@ const ClosedOrders = () => {
       <button className="bg-blue-500 text-white px-4 py-2" onClick={() => navigate('/orderbook')}>
         Back to Open Orders
       </button>
-      {/* Display closed orders in a table similar to the open orders */}
+        
     </div>
   );
 };
