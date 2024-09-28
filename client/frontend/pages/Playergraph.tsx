@@ -52,34 +52,34 @@ const PlayerGraph: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPlayer();
-  
+
     const socket = new WebSocket('wss://aptosarena.onrender.com');
     socket.onopen = () => {
       socket.send(JSON.stringify({ playerId: id }));
     };
-  
+
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.playerId === id) {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
-  
+
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
-  
+
           const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
           updatedData.push({
             time: now,
             value: currentValue,
             color,
           });
-  
+
           return updatedData;
         });
-  
+
         // Update the player's value in real-time
         setPlayer((prevPlayer) => {
           if (prevPlayer) {
@@ -87,17 +87,16 @@ const PlayerGraph: React.FC = () => {
           }
           return prevPlayer;
         });
-  
+
         // Update player stats (optional, depending on WebSocket message)
         setStats(message.stats);
       }
     };
-  
+
     return () => {
       socket.close();
     };
   }, [id]);
-  
 
   const handleBuy = async () => {
     const privateKey = localStorage.getItem('privateKey');
@@ -136,92 +135,95 @@ const PlayerGraph: React.FC = () => {
   }
 
   const options = {
-  chart: {
-    type: 'area',
-    backgroundColor: '#181818',
-  },
-  title: {
-    text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
-    style: { color: '#ffffff', fontWeight: 'bold', fontSize: '20px' },
-  },
-  yAxis: {
+    chart: {
+      type: 'area',
+      backgroundColor: '#181818',
+    },
     title: {
-      text: 'Value',
-      style: { color: '#ffffff', fontSize: '14px' },
+      text: `Player Value Over Time (${player?.firstName || 'Loading...'} ${player?.lastName || ''})`,
+      style: { color: '#ffffff', fontWeight: 'bold', fontSize: '20px' },
     },
-    gridLineColor: '#444',
-    labels: {
+    yAxis: {
+      title: {
+        text: 'Value',
+        style: { color: '#ffffff', fontSize: '14px' },
+      },
+      gridLineColor: '#444',
+      labels: {
+        style: {
+          color: '#ffffff',
+        },
+      },
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: {
+        style: {
+          color: '#ffffff',
+        },
+        formatter: function (): string {
+          const date = new Date((this as any).value);
+          return date.toLocaleString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          });
+        }
+      },
+      title: {
+        text: 'Time',
+        style: { color: '#ffffff', fontSize: '14px' },
+      },
+    },
+    tooltip: {
+      shared: true,
       style: {
-        color: '#ffffff',
+        color: '#99999',
+      },
+      formatter: function (this: Highcharts.TooltipFormatterContextObject): string {
+        const point = this.points ? this.points[0] : { x: 0, y: 0 };
+        const date = new Date(point.x ?? 0);
+        const formattedDate = date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        return `<b>${formattedDate}</b><br/>Value: ${Highcharts.numberFormat(point.y ?? 0, 2)} APT`;
+      }
+    },
+    plotOptions: {
+      area: {
+        fillOpacity: 0.5,
+        marker: {
+          enabled: false,
+        },
+        threshold: null,
       },
     },
-  },
-  xAxis: {
-    type: 'datetime',
-    labels: {
-      style: {
-        color: '#ffffff',
+    series: [
+      {
+        name: 'Player Value',
+        data: areaGraphData.map(({ time, value }) => [time, value]),
+        color: '#1e90ff',
+        zones: areaGraphData.map(({ value, color }) => ({
+          value: value,
+          color: color,
+        })),
+        fillColor: {
+          linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+          stops: [
+            [0, 'rgba(0, 255, 0, 0.5)'],
+            [1, 'rgba(255, 0, 0, 0.5)'],
+          ],
+        },
       },
-    },
-    dateTimeLabelFormats: {
-      millisecond: '%H:%M:%S.%L',
-      second: '%H:%M:%S',
-      minute: '%H:%M',
-      hour: '%H:%M',
-      day: '%e. %b',
-      week: '%e. %b',
-      month: '%b \'%y',
-      year: '%Y'
-    }
-  },
-  tooltip: {
-    shared: true,
-    style: {
-      color: '#99999',
-    },
-    formatter: function (this: Highcharts.TooltipFormatterContextObject): string {
-      const point = this.points ? this.points[0] : { x: 0, y: 0 };
-      const date = new Date(point.x ?? 0);
-      const formattedDate = date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-      });
-      return `<b>${formattedDate}</b><br/>Value: ${Highcharts.numberFormat(point.y ?? 0, 2)} APT`;
-    }
-  },
-  plotOptions: {
-    area: {
-      fillOpacity: 0.5,
-      marker: {
-        enabled: false,
-      },
-      threshold: null,
-    },
-  },
-  series: [
-    {
-      name: 'Player Value',
-      data: areaGraphData.map(({ time, value }) => [time, value]),
-      color: '#1e90ff',
-      zones: areaGraphData.map(({ value, color }) => ({
-        value: value,
-        color: color,
-      })),
-      fillColor: {
-        linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
-        stops: [
-          [0, 'rgba(0, 255, 0, 0.5)'],
-          [1, 'rgba(255, 0, 0, 0.5)'],
-        ],
-      },
-    },
-  ],
-};
+    ],
+  };
 
   return (
     <>
