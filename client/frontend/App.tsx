@@ -8,6 +8,7 @@ import Signin from "./pages/Signin";
 import Playergraph from "./pages/Playergraph";
 import UserProfile from "./pages/Userprofile";
 import OrderBook from "./pages/OrderBook";
+import ClosedOrders from "./pages/Closed";
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<UserProfile/>} />
             <Route path="/orderBook" element={<OrderBook/>} />
+            <Route path="/closed-orders" element={<ClosedOrders/>} />
           </Routes>
         </div>
       </BrowserRouter>
