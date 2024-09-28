@@ -10,11 +10,11 @@ const Signin = () => {
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [isLoginSuccess, setIsLoginSuccess] = useState(false);  // State for login success message
+  const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Function to handle account generation
   const handleGenerateKeys = async () => {
     try {
       const response = await axios.get('https://cricktrade-server.azurewebsites.net/api/user/generateAccount');
@@ -31,32 +31,73 @@ const Signin = () => {
     }
   };
 
-  // Function to handle sign-in
+  const handleDownloadKeys = () => {
+    const keys = JSON.stringify({ publicKey, privateKey }, null, 2);
+    const blob = new Blob([keys], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'keys.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const contents = e.target?.result as string;
+        try {
+          const parsedData = JSON.parse(contents);
+          const uploadedPublicKey = parsedData.publicKey;
+          const uploadedPrivateKey = parsedData.privateKey;
+
+          if (uploadedPublicKey && uploadedPrivateKey) {
+            setPublicKey(uploadedPublicKey);
+            setPrivateKey(uploadedPrivateKey);
+            handleSignInWithKeys(uploadedPublicKey, uploadedPrivateKey);
+          } else {
+            alert("Invalid keys in the uploaded file.");
+          }
+        } catch (error) {
+          console.error('Error parsing JSON:', error);
+          alert("Failed to parse the JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleSignInWithKeys = async (publicKey: string, privateKey: string) => {
+    setLoading(true);
+    try {
+      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/user/signin', { publicKey, privateKey });
+      if (response.status === 200) {
+        localStorage.setItem('publicKey', publicKey);
+        localStorage.setItem('privateKey', privateKey);
+        setIsLoginSuccess(true);
+        setShowPopup(true);
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error signing in:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
     const publicKey = (document.getElementById('publicKey') as HTMLInputElement).value;
     const privateKey = (document.getElementById('privateKey') as HTMLInputElement).value;
 
-    try {
-      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/user/signin', { publicKey, privateKey });
-      if (response.status === 200) {
-        // Save keys to localStorage
-        localStorage.setItem('publicKey', publicKey);
-        localStorage.setItem('privateKey', privateKey);
-
-        // Show login success popup
-        setIsLoginSuccess(true);
-        setShowPopup(true);
-        setTimeout(() => {
-          navigate('/');  // Redirect after successful login
-        }, 2000);  // Redirect after 2 seconds
-      }
-    } catch (error) {
-      console.error('Error signing in:', error);
-    }
+    await handleSignInWithKeys(publicKey, privateKey);
   };
 
-  // Copy key to clipboard
   const handleCopyToClipboard = (key: string | null) => {
     if (key) {
       navigator.clipboard.writeText(key);
@@ -68,54 +109,95 @@ const Signin = () => {
     <>
       <Navbar />
       <Rollingstrip />
-      <div className="w-full h-screen flex justify-center items-center bg-gradient-to-r bg-gray-900">
-        <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
-          <h1 className="text-4xl font-bold text-white mb-8 text-center">Sign In</h1>
-
-          <form>
-            <div className="mb-6">
-              <label htmlFor="publicKey" className="block text-white text-sm font-medium mb-2">Public Key</label>
-              <input
-                id="publicKey"
-                type="text"
-                placeholder="Enter your public key"
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label htmlFor="privateKey" className="block text-white text-sm font-medium mb-2">Private Key</label>
-              <input
-                id="privateKey"
-                type="password"
-                placeholder="Enter your private key"
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
-
-            <button
-              onClick={handleSignIn}
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg shadow-md hover:bg-blue-700 transition"
-            >
-              Sign In
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <button
-              onClick={handleGenerateKeys}
-              className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
-            >
-              Generate New Keys
-            </button>
+      <div className="w-full h-screen flex justify-center items-center bg-gradient-to-r from-gray-900 to-gray-800">
+        {loading ? (
+          <div className="w-full h-full flex justify-center items-center">
+            <div className="loader"></div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
+            <h1 className="text-4xl font-bold text-white mb-8 text-center">Sign In</h1>
+
+            <form onSubmit={handleSignIn}>
+              <div className="mb-6">
+                <label htmlFor="publicKey" className="block text-white text-sm font-medium mb-2">Public Key</label>
+                <input
+                  id="publicKey"
+                  type="text"
+                  placeholder="Enter your public key"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="privateKey" className="block text-white text-sm font-medium mb-2">Private Key</label>
+                <input
+                  id="privateKey"
+                  type="password"
+                  placeholder="Enter your private key"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg shadow-md hover:bg-blue-700 transition"
+              >
+                Sign In
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <button
+                onClick={handleGenerateKeys}
+                className="w-full bg-purple-600 text-white py-3 rounded-lg shadow-md hover:bg-purple-700 transition"
+              >
+                Generate New Keys
+              </button>
+            </div>
+
+            <div className="mt-4 text-center">
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <div className="bg-gray-700 border border-gray-600 rounded-lg py-2 px-4 transition hover:bg-gray-600">
+                  <span className="text-white">Upload Key File (JSON)</span>
+                </div>
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                onChange={handleFileUpload}
+                accept=".json"
+                className="hidden"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Spinner CSS */}
+        <style>{`
+          .loader {
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid #ffffff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
 
         {/* Popup for generated keys or login success */}
         {showPopup && (
-          <div className="fixed right-0 top-0 h-full w-1/3 bg-gray-800 bg-opacity-70 flex flex-col justify-center items-center z-50 p-4">
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-xs border border-gray-600 relative">
+          <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-gray-900 p-6 rounded-lg shadow-lg max-w-md w-full border border-gray-600 relative">
               <button
                 onClick={() => setShowPopup(false)}
                 className="absolute top-2 right-2 text-white text-lg font-bold"
@@ -139,7 +221,7 @@ const Signin = () => {
                       <FontAwesomeIcon icon={faCopy} className="text-white" />
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <p className="text-white overflow-hidden overflow-ellipsis whitespace-nowrap">
                       <strong>Private Key:</strong> {privateKey}
                     </p>
@@ -150,6 +232,12 @@ const Signin = () => {
                       <FontAwesomeIcon icon={faCopy} className="text-white" />
                     </div>
                   </div>
+                  <button
+                    onClick={handleDownloadKeys}
+                    className="mt-4 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                  >
+                    Download Keys
+                  </button>
                 </div>
               )}
 
