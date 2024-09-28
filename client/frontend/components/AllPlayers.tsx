@@ -36,7 +36,7 @@ const AllPlayers = () => {
     fetchPlayers();
   }, []);
 
-  const roundNumbers = (value : number ) => {
+  const roundNumbers = (value: number) => {
     return Math.round(value * 100) / 100
   }
 
@@ -81,14 +81,14 @@ const AllPlayers = () => {
                 <td className="px-6 py-4">{roundNumbers(player.value)} APT</td>
                 <td className="px-6 py-4">{player.quantity}</td>
                 <td className="px-6 py-4">
-                <button
-  className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md border border-blue-500 hover:bg-gray-700 hover:text-blue-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-  onClick={() => {
-    navigatetoGraph(player._id);
-  }}
->
-  SEE LIVE CHARTS
-</button>
+                  <button
+                    className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md border border-blue-500 hover:bg-gray-700 hover:text-blue-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                    onClick={() => {
+                      navigatetoGraph(player._id);
+                    }}
+                  >
+                    SEE LIVE CHARTS
+                  </button>
 
                 </td>
               </tr>

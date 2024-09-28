@@ -41,6 +41,7 @@ const PlayerGraph: React.FC = () => {
   const [decrementAmount, setDecrementAmount] = useState<number>(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [playerQuantity, setPlayerQuantity] = useState<number>(0);
+  const [isGraph, setIsgraph] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -53,70 +54,74 @@ const PlayerGraph: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
+    setTimeout(() => {
+      setIsgraph(false);
+    }, 6000)
+
     fetchPlayer();
-  
+
     const socket = new WebSocket('wss://aptosarena.onrender.com');
     socket.onopen = () => {
       socket.send(JSON.stringify({ playerId: id }));
     };
-  
+
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.playerId === id) {
         const currentValue = message.currentValue;
         const now = new Date().getTime();
-  
+
         setAreaGraphData((prevData) => {
           const updatedData = [...prevData];
           const lastValue = prevData.length > 0 ? prevData[prevData.length - 1].value : currentValue;
-  
+
           const color = currentValue >= lastValue ? '#00ff00' : '#ff0000';
           updatedData.push({
             time: now,
             value: currentValue,
             color,
           });
-  
+
           return updatedData;
         });
-  
+
         setPlayer((prevPlayer) => {
           if (prevPlayer) {
-            return { ...prevPlayer, value: currentValue }; 
+            return { ...prevPlayer, value: currentValue };
           }
           return prevPlayer;
         });
-  
-  
+
+
         setStats(message.stats);
       }
     };
-  
+
     return () => {
       socket.close();
     };
   }, [id]);
-  
+
   useEffect(() => {
     if (!player) return;
-  
+
     const fetchPlayerQuantity = async () => {
       const publicKey = localStorage.getItem('publicKey');
       if (!publicKey) {
         console.log('User not logged in');
         return;
       }
-  
+
       try {
         const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/user/get-stocks/${publicKey}`);
         const fetchedStocks = response.data;
-  
+
         const playerStock = fetchedStocks.find((stock: any) =>
           stock.player.firstName === player.firstName &&
           stock.player.lastName === player.lastName
         );
-  
+
         if (playerStock) {
           setPlayerQuantity(playerStock.quantity);
         } else {
@@ -126,10 +131,10 @@ const PlayerGraph: React.FC = () => {
         console.error('Failed to fetch player quantity:', err);
       }
     };
-  
+
     fetchPlayerQuantity();
-  }, [player]); 
-  
+  }, [player]);
+
 
   const handleBuy = async () => {
     const privateKey = localStorage.getItem('privateKey');
@@ -300,7 +305,7 @@ const PlayerGraph: React.FC = () => {
                   <div className='h-auto w-full border flex flex-col border-gray-700 mt-20 p-4'>
                     <span className='text-lg font-semibold'>Player Quantity In Your Portfolio</span>
                     <span className='mt-2'>Quantity : {playerQuantity}</span>
-                    <span>Net value : {totalValue(playerQuantity , player?.value ?? 0)} APT</span>
+                    <span>Net value : {totalValue(playerQuantity, player?.value ?? 0)} APT</span>
                   </div>
 
                   {/* Input for Decrement Amount */}
@@ -315,7 +320,7 @@ const PlayerGraph: React.FC = () => {
                   </div>
                 </div>
 
-                <div className='flex flex-row w-full gap-4'>
+                <div className='flex flex-row w-full gap-4 mb-3 md:mb-0'>
                   {/* Buy Button */}
                   <button
                     onClick={() => setIsDialogOpen(true)}
@@ -363,10 +368,14 @@ const PlayerGraph: React.FC = () => {
 
               {/* Right Side - Graph */}
               <div className='w-full'>
-                <div className="flex-1">
-                  <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
+                <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
+                  {isGraph ? (
+                    <div className="flex items-center justify-center h-96">
+                      <div className="text-2xl font-medium">Loading the Graph...</div>
+                    </div>
+                  ) : (
                     <HighchartsReact highcharts={Highcharts} options={options} />
-                  </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-8">
                   {[
