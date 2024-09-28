@@ -1,6 +1,6 @@
 .rolling-strip {
   display: flex;
-  animation: roll 7s linear infinite;
+  animation: roll 5s linear infinite; /* Faster animation */
   white-space: nowrap;
 }
 
@@ -20,8 +20,9 @@
   }
 }
 
+/* Ensure the speed is consistent on mobile */
 @media (max-width: 768px) {
   .rolling-strip {
-    animation-duration: 30s;
+    animation: roll 3s linear infinite; /* Same speed for mobile */
   }
 }

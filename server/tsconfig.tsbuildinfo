@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/match.ts","./src/playerAddress.ts","./src/db/index.ts","./src/routes/playerRouter.ts","./src/routes/purchase.ts","./src/routes/userRouter.ts"],"version":"5.6.2"}
+{"root":["./src/index.ts","./src/match.ts","./src/playeraddress.ts","./src/db/index.ts","./src/routes/playerrouter.ts","./src/routes/purchase.ts","./src/routes/userrouter.ts"],"version":"5.6.2"}

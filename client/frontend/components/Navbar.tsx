@@ -5,43 +5,38 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
-  const [showLoginRequiredPopup, setShowLoginRequiredPopup] = useState(false); // New state for login-required popup
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
+  const [showLoginRequiredPopup, setShowLoginRequiredPopup] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Check if privateKey is in localStorage
   useEffect(() => {
     const privateKey = localStorage.getItem('privateKey');
-    setIsLoggedIn(!!privateKey); // Set logged-in state based on presence of privateKey
+    setIsLoggedIn(!!privateKey);
   }, []);
 
-  // Handle sign-in redirection
   const handleSignIn = () => {
     navigate('/signin');
   };
 
-  // Handle log out
   const handleLogout = () => {
-    localStorage.removeItem('privateKey'); // Remove privateKey from localStorage
-    setIsLoggedIn(false); // Update the state
-    setShowLogoutPopup(true); // Show the popup
-    navigate('/'); // Redirect to the home page after logging out
-
-    // Automatically hide the popup after 3 seconds
+    localStorage.removeItem('privateKey');
+    setIsLoggedIn(false);
+    setShowLogoutPopup(true);
+    navigate('/');
     setTimeout(() => {
       setShowLogoutPopup(false);
     }, 3000);
   };
 
-  // Handle navigation to the Portfolio page
   const handlePortfolioClick = () => {
     if (isLoggedIn) {
-      navigate('/profile'); // Allow navigation to the Portfolio page if logged in
+      navigate('/profile');
     } else {
-      setShowLoginRequiredPopup(true); // Show the login required popup if not logged in
+      setShowLoginRequiredPopup(true);
       setTimeout(() => {
         setShowLoginRequiredPopup(false);
-        navigate('/signin'); // Redirect to the sign-in page after showing the popup
-      }, 3000); // Show the popup for 3 seconds
+        navigate('/signin');
+      }, 3000);
     }
   };
 
@@ -50,12 +45,15 @@ const Navbar = () => {
       <nav className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-4 shadow-md w-full">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo */}
-          <div className="text-white text-3xl font-extrabold tracking-wide">
+            <div
+            className="text-white text-3xl font-extrabold tracking-wide cursor-pointer"
+            onClick={() => navigate('/')}
+            >
             CrickTrade
-          </div>
+            </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="md:hidden mt-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-white focus:outline-none"
@@ -78,13 +76,13 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Links */}
-          <ul className={`md:flex space-x-8 text-white font-medium ${isMenuOpen ? 'block' : 'hidden'} md:block`}>
+          <ul className={`hidden md:flex space-x-8 text-white font-medium`}>
             <li className="transition transform hover:scale-105">
               <p
-                onClick={handlePortfolioClick} // Handle the portfolio link click
+                onClick={handlePortfolioClick}
                 className="hover:text-blue-400 cursor-pointer transition-colors duration-300"
               >
-                Portfolio
+              Portfolio
               </p>
             </li>
             <li className="transition transform hover:scale-105">
@@ -97,7 +95,7 @@ const Navbar = () => {
             </li>
             <li className="transition transform hover:scale-105">
               <a href="/orderbook" className="hover:text-blue-400 transition-colors duration-300">
-              OrderBook
+                OrderBook
               </a>
             </li>
           </ul>
@@ -119,6 +117,35 @@ const Navbar = () => {
             </button>
           )}
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-gray-900 shadow-md">
+            <ul className="flex flex-col space-y-2 p-4">
+              <li>
+                <p
+                  onClick={handlePortfolioClick}
+                  className="text-white hover:text-blue-400 cursor-pointer transition-colors duration-300"
+                >
+                  Portfolio
+                </p>
+              </li>
+              <li>
+                <p
+                  onClick={() => { navigate("/") }}
+                  className="text-white hover:text-blue-400 cursor-pointer transition-colors duration-300"
+                >
+                  Player Live
+                </p>
+              </li>
+              <li>
+                <a href="/orderbook" className="text-white hover:text-blue-400 transition-colors duration-300">
+                  OrderBook
+                </a>
+              </li>
+            </ul>
+          </div>
+        )}
       </nav>
 
       {/* Logout Successful Popup */}
