@@ -74,15 +74,15 @@ export function AnimatedPinDemo() {
       </div>
 
       {/* Player cards grid */}
-      <div className="h-full w-full flex items-center flex-col mt-10">
-        <div className="flex flex-row pl-[14%] pt-4 pb-4 justify-start w-full text-2xl font-semibold gap-2 items-center">
+      <div className="h-full w-full flex items-center flex-col mt-10 px-4">
+        <div className="flex flex-row pt-4 pb-4 pl-[14%] justify-start w-full text-2xl font-semibold gap-2 items-center">
           <h1>Top Players</h1> <GraphIcon />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 pl-8 pr-8 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full md:pl-8 md:pr-8 lg:w-auto">
           {players.map((player, index) => (
             <div key={index} title={`${player.firstName} ${player.lastName}`}>
-              <div className="flex flex-col bg-gray-900 border border-gray-700 rounded-xl shadow-xl hover:shadow-3xl transition-shadow duration-300 w-[27rem] ">
-                <div className="flex flex-row gap-4 items-center pr-4 pl-4 pt-4">
+              <div className="flex flex-col bg-gray-900 border border-gray-700 rounded-xl shadow-xl hover:shadow-3xl transition-shadow duration-300 w-full md:w-[27rem]">
+                <div className="flex flex-row gap-4 items-center p-4">
                   <img
                     src={player.imageUrl}
                     alt={`${player.firstName} ${player.lastName}`}
@@ -96,7 +96,7 @@ export function AnimatedPinDemo() {
                   </div>
                 </div>
                 <div className="border-b h-1 border-gray-700 my-2"></div>
-                <div className="flex flex-col p-4 ">
+                <div className="flex flex-col p-4">
                   <h3>
                     <span className="font-semibold text-neutral-200">Price</span>{" "}
                     : {roundNumbers(player.value)} APT

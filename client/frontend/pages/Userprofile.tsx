@@ -123,7 +123,7 @@ const UserProfile: React.FC = () => {
     <>
       <Navbar />
       <Rollingstrip />
-      <div className="min-h-screen bg-gradient-to-b from-gray-800 to-gray-900 text-white flex items-center justify-center p-8 w-full">
+      <div className="min-h-screen bg-gradient-to-b from-gray-800 to-gray-900 text-white flex items-center justify-center p-4 sm:p-8 w-full">
         <div className="w-full max-w-7xl">
           {loading ? (
             <div className="text-center text-3xl font-semibold">Loading...</div>
@@ -134,29 +134,29 @@ const UserProfile: React.FC = () => {
               <h1 className="text-4xl font-bold mb-8 text-center">Your Portfolio</h1>
               
               {/* Total worth of user's assets */}
-              <div className="mt-8 bg-gray-800 p-8 rounded-lg shadow-lg text-center">
+              <div className="mt-8 bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center">
                 <h2 className="text-2xl font-semibold mb-4">Total Asset Worth</h2>
                 <p className="text-xl">
                   Total Value of Assets: <span className="text-green-400">{totalWorth.toFixed(2)} APT</span>
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mt-8">
                 {stocks.map((stock) => (
                   <div
                     key={stock.playerId}
-                    className="bg-gray-800 p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"
+                    className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"
                   >
                     <img
                       src={stock.player.imageUrl}
                       alt={stock.player.playerName}
-                      className="rounded-full w-24 h-24 mb-4 mx-auto object-cover border-4 border-gray-600"
+                      className="rounded-full w-20 h-20 sm:w-24 sm:h-24 mb-4 mx-auto object-cover border-4 border-gray-600"
                     />
-                    <h2 className="text-2xl font-semibold text-center mb-2">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-center mb-2">
                       {stock.player.firstName} {stock.player.lastName}
                     </h2>
                     <p className="text-center text-gray-400 mb-4">{stock.player.nationality}</p>
-                    <div className="flex justify-around text-sm text-gray-400 mb-4">
+                    <div className="flex justify-around text-xs sm:text-sm text-gray-400 mb-4">
                       <p>
                         Role: <span className="text-white">{stock.player.role}</span>
                       </p>
@@ -186,9 +186,9 @@ const UserProfile: React.FC = () => {
               </div>
 
               {/* Role bifurcation with Pie Chart */}
-              <div className="mt-12 bg-gray-800 p-8 rounded-lg shadow-lg text-center">
+              <div className="mt-12 bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center">
                 <h2 className="text-3xl font-semibold mb-6">Player Role Summary</h2>
-                <div className="w-64 mx-auto">
+                <div className="w-full sm:w-64 mx-auto">
                   <Pie data={pieData} />
                 </div>
               </div>

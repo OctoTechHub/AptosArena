@@ -9,12 +9,12 @@ const Home = () => {
       <Navbar />
 
       {/* Top Players Section */}
-      <div className="top-players w-full py-6 md:py-12">
+      <div className="top-players w-full py-6">
         <AnimatedPinDemo />
       </div>
 
       {/* All Players Section */}
-      <div className="all-players w-full py-6 md:py-12">
+      <div className="all-players w-full">
         <AllPlayers />
       </div>
     </div>

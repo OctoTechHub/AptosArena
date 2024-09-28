@@ -5,7 +5,6 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Rollingstrip from '@/components/Rollingstrip';
-import { PinContainer } from './../components/ui/3d-pin';
 
 interface AreaGraphData {
   time: number;
@@ -278,17 +277,17 @@ const PlayerGraph: React.FC = () => {
               {/* Left Side - Player Card */}
               <div className='flex flex-col mt-4'>
                 <div className="flex-shrink-0">
-                  <PinContainer title={`${player?.firstName} ${player?.lastName}`}>
-                    <div className="flex flex-col items-center p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-[22rem] h-auto">
+                  <div className='h-auto w-auto p-6 bg-black rounded-xl flex justify-center'>
+                    <div className="flex flex-col items-center p-4 sm:p-6 md:p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-full lg:w-[22rem] h-auto">
                       <img
                         src={player?.imageUrl}
                         alt={player?.playerName}
-                        className="rounded-full h-28 w-28 mb-4 object-cover border-4 border-gray-700"
+                        className="rounded-full h-24 w-24 sm:h-28 sm:w-28 mb-4 object-cover border-4 border-gray-700"
                       />
-                      <h3 className="font-semibold text-3xl text-center text-white mb-4">
+                      <h3 className="font-semibold text-xl sm:text-2xl md:text-3xl text-center text-white mb-4">
                         {player?.firstName} {player?.lastName}
                       </h3>
-                      <div className="text-md text-center text-gray-300 mb-4 space-y-2">
+                      <div className="text-sm sm:text-md text-center text-gray-300 mb-4 space-y-2">
                         <p className="font-medium">
                           Nationality: <span className="text-white">{player?.nationality}</span>
                         </p>
@@ -300,9 +299,9 @@ const PlayerGraph: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                  </PinContainer>
+                  </div>
 
-                  <div className='h-auto w-full border flex flex-col border-gray-700 mt-20 p-4'>
+                  <div className='h-auto w-full border flex flex-col border-gray-700 mt-4 p-4'>
                     <span className='text-lg font-semibold'>Player Quantity In Your Portfolio</span>
                     <span className='mt-2'>Quantity : {playerQuantity}</span>
                     <span>Net value : {totalValue(playerQuantity, player?.value ?? 0)} APT</span>
