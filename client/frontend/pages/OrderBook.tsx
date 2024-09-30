@@ -41,7 +41,7 @@ const OrderBook = () => {
   useEffect(() => {
     const fetchOrderBook = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/purchase/getOrderBook');
+        const response = await axios.get('https://cricktrade-server.azurewebsites.net/api/purchase/getOrderBook');
         setOrderBook(response.data);
         setLoading(false);
       } catch (err) {
@@ -56,7 +56,7 @@ const OrderBook = () => {
     const publicKey = localStorage.getItem('publicKey');
     const privateKey = localStorage.getItem('privateKey');
     try {
-      const response = await axios.post('http://localhost:3000/api/purchase/buyFromOrderBook', {
+      const response = await axios.post('https://cricktrade-server.azurewebsite.net/api/purchase/buyFromOrderBook', {
         orderId,
         publicKey,
         privateKey
@@ -201,7 +201,8 @@ const OrderBook = () => {
                             {new Date(order.orderTime).toLocaleString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {order.orderType === 'sell' && order.orderStatus !== 'completed' ? (
+                            {/* Only show Buy button for open orders */}
+                            {order.orderStatus == 'open' &&order.orderType!=='buy'   ? (
                               <button
                                 onClick={() => buyFromOrderBook(order._id)}
                                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300"
@@ -215,6 +216,7 @@ const OrderBook = () => {
                         </tr>
                       ))}
                   </tbody>
+
                 </table>
               </div>
             </div>
