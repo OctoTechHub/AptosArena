@@ -269,128 +269,131 @@ const PlayerGraph: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white w-full">
         <div className="w-full max-w-6xl p-10 rounded-lg bg-gray-800 shadow-xl">
           {loading ? (
-            <div className="text-2xl font-medium">Loading player data...</div>
+            <div className="bg-gray-900 w-full h-full justify-center items-center flex flex-col gap-2">
+              <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-blue-500"></div>
+              <div className='text-2xl text-white font-semibold'>Loading...</div>
+            </div>
           ) : error ? (
-            <div className="text-2xl text-red-500 font-semibold">{error}</div>
+          <div className="text-2xl text-red-500 font-semibold">{error}</div>
           ) : (
-            <div className="flex flex-col lg:flex-row lg:space-x-8">
-              {/* Left Side - Player Card */}
-              <div className='flex flex-col mt-4'>
-                <div className="flex-shrink-0">
-                  <div className='h-auto w-auto p-6 bg-black rounded-xl flex justify-center'>
-                    <div className="flex flex-col items-center p-4 sm:p-6 md:p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-full lg:w-[22rem] h-auto">
-                      <img
-                        src={player?.imageUrl}
-                        alt={player?.playerName}
-                        className="rounded-full h-24 w-24 sm:h-28 sm:w-28 mb-4 object-cover border-4 border-gray-700"
-                      />
-                      <h3 className="font-semibold text-xl sm:text-2xl md:text-3xl text-center text-white mb-4">
-                        {player?.firstName} {player?.lastName}
-                      </h3>
-                      <div className="text-sm sm:text-md text-center text-gray-300 mb-4 space-y-2">
-                        <p className="font-medium">
-                          Nationality: <span className="text-white">{player?.nationality}</span>
-                        </p>
-                        <p className="font-medium">
-                          Role: <span className="text-white">{player?.role}</span>
-                        </p>
-                        <p className="font-medium">
-                          Value: <span className="text-white">{roundNumbers(player?.value ?? 0)} APT</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className='h-auto w-full border flex flex-col border-gray-700 mt-4 p-4'>
-                    <span className='text-lg font-semibold'>Player Quantity In Your Portfolio</span>
-                    <span className='mt-2'>Quantity : {playerQuantity}</span>
-                    <span>Net value : {totalValue(playerQuantity, player?.value ?? 0)} APT</span>
-                  </div>
-
-                  {/* Input for Decrement Amount */}
-                  <div className="mb-4 mt-8">
-                    <label className="block text-white mb-2 font-semibold">Quantity</label>
-                    <input
-                      type="number"
-                      className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
-                      value={decrementAmount}
-                      onChange={(e) => setDecrementAmount(Number(e.target.value))}
+          <div className="flex flex-col lg:flex-row lg:space-x-8">
+            {/* Left Side - Player Card */}
+            <div className='flex flex-col mt-4'>
+              <div className="flex-shrink-0">
+                <div className='h-auto w-auto p-6 bg-black rounded-xl flex justify-center'>
+                  <div className="flex flex-col items-center p-4 sm:p-6 md:p-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 w-full lg:w-[22rem] h-auto">
+                    <img
+                      src={player?.imageUrl}
+                      alt={player?.playerName}
+                      className="rounded-full h-24 w-24 sm:h-28 sm:w-28 mb-4 object-cover border-4 border-gray-700"
                     />
-                  </div>
-                </div>
-
-                <div className='flex flex-row w-full gap-4 mb-3 md:mb-0'>
-                  {/* Buy Button */}
-                  <button
-                    onClick={() => setIsDialogOpen(true)}
-                    className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-400 transition-colors duration-300 "
-                  >
-                    Buy Player
-                  </button>
-                  {/* Sell Button */}
-                  <button
-                    onClick={() => setIsDialogOpen(true)}
-                    className="w-full px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-400 transition-colors duration-300">
-                    Sell Player
-                  </button>
-                </div>
-
-                {/* Custom Dialog */}
-                {isDialogOpen && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-gray-800 p-8 rounded-xl max-w-md w-full">
-                      <h2 className="text-2xl font-bold mb-4">Confirm Purchase</h2>
-                      <div className="mb-4 flex flex-col">
-                        <span className='text-lg font-semibold'>Player Name : {player?.firstName} {player?.lastName}</span>
-                        <span className='mt-2'>Value : {roundNumbers(player?.value ?? 0)} APT</span>
-                        <span>Quantity : {decrementAmount}</span>
-                        <span>Total amount : {totalValue(decrementAmount, player?.value ?? 0)} APT</span>
-                      </div>
-                      <div className="flex justify-end space-x-4">
-                        <button
-                          onClick={() => setIsDialogOpen(false)}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors duration-300"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleBuy}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors duration-300"
-                        >
-                          Confirm Purchase
-                        </button>
-                      </div>
+                    <h3 className="font-semibold text-xl sm:text-2xl md:text-3xl text-center text-white mb-4">
+                      {player?.firstName} {player?.lastName}
+                    </h3>
+                    <div className="text-sm sm:text-md text-center text-gray-300 mb-4 space-y-2">
+                      <p className="font-medium">
+                        Nationality: <span className="text-white">{player?.nationality}</span>
+                      </p>
+                      <p className="font-medium">
+                        Role: <span className="text-white">{player?.role}</span>
+                      </p>
+                      <p className="font-medium">
+                        Value: <span className="text-white">{roundNumbers(player?.value ?? 0)} APT</span>
+                      </p>
                     </div>
                   </div>
+                </div>
+
+                <div className='h-auto w-full border flex flex-col border-gray-700 mt-4 p-4'>
+                  <span className='text-lg font-semibold'>Player Quantity In Your Portfolio</span>
+                  <span className='mt-2'>Quantity : {playerQuantity}</span>
+                  <span>Net value : {totalValue(playerQuantity, player?.value ?? 0)} APT</span>
+                </div>
+
+                {/* Input for Decrement Amount */}
+                <div className="mb-4 mt-8">
+                  <label className="block text-white mb-2 font-semibold">Quantity</label>
+                  <input
+                    type="number"
+                    className="px-4 py-2 rounded-lg bg-gray-700 text-white w-full"
+                    value={decrementAmount}
+                    onChange={(e) => setDecrementAmount(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div className='flex flex-row w-full gap-4 mb-3 md:mb-0'>
+                {/* Buy Button */}
+                <button
+                  onClick={() => setIsDialogOpen(true)}
+                  className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-400 transition-colors duration-300 "
+                >
+                  Buy Player
+                </button>
+                {/* Sell Button */}
+                <button
+                  onClick={() => setIsDialogOpen(true)}
+                  className="w-full px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-400 transition-colors duration-300">
+                  Sell Player
+                </button>
+              </div>
+
+              {/* Custom Dialog */}
+              {isDialogOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-gray-800 p-8 rounded-xl max-w-md w-full">
+                    <h2 className="text-2xl font-bold mb-4">Confirm Purchase</h2>
+                    <div className="mb-4 flex flex-col">
+                      <span className='text-lg font-semibold'>Player Name : {player?.firstName} {player?.lastName}</span>
+                      <span className='mt-2'>Value : {roundNumbers(player?.value ?? 0)} APT</span>
+                      <span>Quantity : {decrementAmount}</span>
+                      <span>Total amount : {totalValue(decrementAmount, player?.value ?? 0)} APT</span>
+                    </div>
+                    <div className="flex justify-end space-x-4">
+                      <button
+                        onClick={() => setIsDialogOpen(false)}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors duration-300"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleBuy}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors duration-300"
+                      >
+                        Confirm Purchase
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Side - Graph */}
+            <div className='w-full'>
+              <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
+                {isGraph ? (
+                  <div className="flex items-center justify-center h-96">
+                    <div className="text-2xl font-medium">Loading the Graph...</div>
+                  </div>
+                ) : (
+                  <HighchartsReact highcharts={Highcharts} options={options} />
                 )}
               </div>
-
-              {/* Right Side - Graph */}
-              <div className='w-full'>
-                <div className="bg-gray-700 rounded-lg p-6 shadow-lg">
-                  {isGraph ? (
-                    <div className="flex items-center justify-center h-96">
-                      <div className="text-2xl font-medium">Loading the Graph...</div>
-                    </div>
-                  ) : (
-                    <HighchartsReact highcharts={Highcharts} options={options} />
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-8">
-                  {[
-                    { label: 'Runs', value: stats?.runs || 0 },
-                    { label: 'Balls Faced', value: stats?.ballsFaced || 0 },
-                    { label: 'Wickets', value: stats?.wickets || 0 },
-                    { label: 'Overs Bowled', value: stats?.oversBowled || 0 },
-                  ].map((stat, index) => (
-                    <div key={index} className="p-4 bg-gray-700 rounded-lg shadow-lg">
-                      <h3 className="text-lg font-medium mb-2">{stat.label}</h3>
-                      <p className="text-2xl font-semibold text-white">{stat.value}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 gap-4 mt-8">
+                {[
+                  { label: 'Runs', value: stats?.runs || 0 },
+                  { label: 'Balls Faced', value: stats?.ballsFaced || 0 },
+                  { label: 'Wickets', value: stats?.wickets || 0 },
+                  { label: 'Overs Bowled', value: stats?.oversBowled || 0 },
+                ].map((stat, index) => (
+                  <div key={index} className="p-4 bg-gray-700 rounded-lg shadow-lg">
+                    <h3 className="text-lg font-medium mb-2">{stat.label}</h3>
+                    <p className="text-2xl font-semibold text-white">{stat.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
           )}
         </div>
       </div>

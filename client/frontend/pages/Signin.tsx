@@ -111,8 +111,9 @@ const Signin = () => {
       <Rollingstrip />
       <div className="w-full h-screen flex justify-center items-center bg-gradient-to-r from-gray-900 to-gray-800">
         {loading ? (
-          <div className="w-full h-full flex justify-center items-center">
-            <div className="loader"></div>
+          <div className="bg-gray-900 w-screen h-screen justify-center items-center flex flex-col gap-2">
+            <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-blue-500"></div>
+            <div className='text-2xl text-white font-semibold'>Loading...</div>
           </div>
         ) : (
           <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full border border-gray-700">

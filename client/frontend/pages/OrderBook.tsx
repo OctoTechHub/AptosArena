@@ -93,8 +93,9 @@ const OrderBook = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="bg-gray-900 w-screen h-screen justify-center items-center flex flex-col gap-2">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-blue-500"></div>
+        <div className='text-2xl text-white font-semibold'>Loading...</div>
       </div>
     );
   }
@@ -202,7 +203,7 @@ const OrderBook = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {/* Only show Buy button for open orders */}
-                            {order.orderStatus == 'open' &&order.orderType!=='buy'   ? (
+                            {order.orderStatus == 'open' && order.orderType !== 'buy' ? (
                               <button
                                 onClick={() => buyFromOrderBook(order._id)}
                                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300"

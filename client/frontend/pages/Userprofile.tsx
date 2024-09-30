@@ -35,12 +35,12 @@ const UserProfile: React.FC = () => {
 
   useEffect(() => {
     const publicKey = localStorage.getItem('publicKey');
-    
+
     const fetchStocks = async () => {
       try {
         const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/user/get-stocks/${publicKey}`);
         const fetchedStocks = response.data;
-        
+
         setStocks(fetchedStocks);
 
         const counts = { batsmen: 0, bowlers: 0, allRounders: 0 };
@@ -108,7 +108,7 @@ const UserProfile: React.FC = () => {
         publicKey,
         privateKey
       });
-      
+
       console.log('Order added:', response.data);
       alert('Order added to the order book successfully!');
     } catch (error) {
@@ -126,13 +126,16 @@ const UserProfile: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-800 to-gray-900 text-white flex items-center justify-center p-4 sm:p-8 w-full">
         <div className="w-full max-w-7xl">
           {loading ? (
-            <div className="text-center text-3xl font-semibold">Loading...</div>
+            <div className="bg-transparent w-full h-screen justify-center items-center flex flex-col gap-2">
+              <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-blue-500"></div>
+              <div className='text-2xl text-white font-semibold'>Loading...</div>
+            </div>
           ) : error ? (
             <div className="text-center text-3xl text-red-500">{error}</div>
           ) : (
             <div>
               <h1 className="text-4xl font-bold mb-8 text-center">Your Portfolio</h1>
-              
+
               {/* Total worth of user's assets */}
               <div className="mt-8 bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center">
                 <h2 className="text-2xl font-semibold mb-4">Total Asset Worth</h2>

@@ -44,7 +44,14 @@ const AllPlayers = () => {
     navigate(`/player/${playerId}`);
   };
 
-  if (loading) return <p className="text-center text-white">Loading...</p>;
+  if (loading) {
+    return (
+      <div className="bg-gray-900 w-screen h-screen justify-center items-center flex flex-col gap-2">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-blue-500"></div>
+        <div className='text-2xl text-white font-semibold'>Loading...</div>
+      </div>
+    );
+  }
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
