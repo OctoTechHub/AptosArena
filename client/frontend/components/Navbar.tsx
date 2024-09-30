@@ -80,7 +80,7 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Links */}
-          <ul className={`hidden md:flex space-x-8 text-white font-semibold text-xl `}>
+          <ul className={`hidden md:flex space-x-8 text-white font-bold  `}>
             <li className="transition transform hover:scale-105">
               <p
                 onClick={handlePortfolioClick}
@@ -138,7 +138,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-gray-900 font-semibold text-md  shadow-md">
+          <div className="md:hidden bg-gray-900 font-bold text-md  shadow-md">
             <ul className="flex flex-col space-y-2 p-4">
               <li>
                 <p
