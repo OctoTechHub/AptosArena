@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Rollingstrip from '@/components/Rollingstrip';
 
@@ -31,12 +31,45 @@ const Alert: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </div>
 );
 
+const Dialog: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description: string;
+}> = ({ isOpen, onClose, title, description }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-white">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+        <p className="text-gray-300 mb-6">{description}</p>
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const OrderBook = () => {
   const [orderBook, setOrderBook] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
-  const [activeTab, setActiveTab] = useState('open'); // 'open' for Open Orders, 'closed' for Closed Orders
+  const [activeTab, setActiveTab] = useState('open');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogContent, setDialogContent] = useState({ title: '', description: '' });
 
   useEffect(() => {
     const fetchOrderBook = async () => {
@@ -62,10 +95,20 @@ const OrderBook = () => {
         privateKey
       });
       if (response.data.message === 'Transaction successful') {
-        alert('Transaction successful');
+        setDialogContent({
+          title: 'Payment Successful',
+          description: 'Your transaction has been processed successfully.'
+        });
+      } else {
+        throw new Error('Transaction failed');
       }
     } catch (error) {
-      alert('Failed to process the transaction');
+      setDialogContent({
+        title: 'Payment Failed',
+        description: 'We were unable to process your transaction. Please try again later.'
+      });
+    } finally {
+      setDialogOpen(true);
     }
   };
 
@@ -202,8 +245,7 @@ const OrderBook = () => {
                             {new Date(order.orderTime).toLocaleString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {/* Only show Buy button for open orders */}
-                            {order.orderStatus == 'open' && order.orderType !== 'buy' ? (
+                            {order.orderStatus === 'open' && order.orderType !== 'buy' ? (
                               <button
                                 onClick={() => buyFromOrderBook(order._id)}
                                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-300"
@@ -217,13 +259,18 @@ const OrderBook = () => {
                         </tr>
                       ))}
                   </tbody>
-
                 </table>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Dialog
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        title={dialogContent.title}
+        description={dialogContent.description}
+      />
     </>
   );
 };
