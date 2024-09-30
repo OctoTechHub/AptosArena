@@ -80,7 +80,7 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Links */}
-          <ul className={`hidden md:flex space-x-8 text-white font-medium`}>
+          <ul className={`hidden md:flex space-x-8 text-white font-bold  `}>
             <li className="transition transform hover:scale-105">
               <p
                 onClick={handlePortfolioClick}
@@ -107,6 +107,14 @@ const Navbar = () => {
                 OrderBook
               </a>
             </li>
+            <li className="transition transform hover:scale-105">
+              <a
+                href="/fund-account"
+                className="hover:text-blue-400 transition-colors duration-300"
+              >
+                Fund Account
+              </a>
+            </li>
           </ul>
 
           {/* Conditional Sign In/Log Out Button */}
@@ -126,10 +134,11 @@ const Navbar = () => {
             </button>
           )}
         </div>
+        
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-gray-900 shadow-md">
+          <div className="md:hidden bg-gray-900 font-bold text-md  shadow-md">
             <ul className="flex flex-col space-y-2 p-4">
               <li>
                 <p
@@ -157,6 +166,14 @@ const Navbar = () => {
                   OrderBook
                 </a>
               </li>
+              <li className="transition transform hover:scale-105">
+              <a
+                href="/fund-account"
+                className="text-white hover:text-blue-400 cursor-pointer transition-colors duration-300"
+              >
+                Fund Account
+              </a>
+            </li>
             </ul>
           </div>
         )}

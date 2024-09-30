@@ -28,7 +28,7 @@ function App() {
             <Route path="/profile" element={<UserProfile/>} />
             <Route path="/orderBook" element={<OrderBook/>} />
             <Route path="/closed-orders" element={<ClosedOrders/>} />
-            <Route path="/fundaccount" element={<FundAccount/>} />
+            <Route path="/fund-account" element={<FundAccount/>} />
           </Routes>
         </div>
       </BrowserRouter>

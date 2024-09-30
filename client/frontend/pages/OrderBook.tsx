@@ -31,12 +31,13 @@ const Alert: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </div>
 );
 
-const Dialog: React.FC<{
+const PaymentDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   title: string;
   description: string;
-}> = ({ isOpen, onClose, title, description }) => {
+  isProcessing: boolean;
+}> = ({ isOpen, onClose, title, description, isProcessing }) => {
   if (!isOpen) return null;
 
   return (
@@ -44,19 +45,28 @@ const Dialog: React.FC<{
       <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-white">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            <X size={24} />
-          </button>
+          {!isProcessing && (
+            <button onClick={onClose} className="text-gray-400 hover:text-white">
+              <X size={24} />
+            </button>
+          )}
         </div>
         <p className="text-gray-300 mb-6">{description}</p>
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
-          >
-            Close
-          </button>
-        </div>
+        {isProcessing && (
+          <div className="flex justify-center mb-6">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        )}
+        {!isProcessing && (
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+            >
+              Close
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -70,6 +80,7 @@ const OrderBook = () => {
   const [activeTab, setActiveTab] = useState('open');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState({ title: '', description: '' });
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
 
   useEffect(() => {
     const fetchOrderBook = async () => {
@@ -88,6 +99,14 @@ const OrderBook = () => {
   const buyFromOrderBook = async (orderId: string) => {
     const publicKey = localStorage.getItem('publicKey');
     const privateKey = localStorage.getItem('privateKey');
+
+    setIsPaymentProcessing(true);
+    setDialogContent({
+      title: 'Processing Payment',
+      description: 'Please wait while we process your payment...'
+    });
+    setDialogOpen(true);
+
     try {
       const response = await axios.post('http://localhost:3000/api/purchase/buyFromOrderBook', {
         orderId,
@@ -108,7 +127,7 @@ const OrderBook = () => {
         description: 'We were unable to process your transaction. Please try again later.'
       });
     } finally {
-      setDialogOpen(true);
+      setIsPaymentProcessing(false);
     }
   };
 
@@ -265,11 +284,12 @@ const OrderBook = () => {
           </div>
         </div>
       </div>
-      <Dialog
+      <PaymentDialog
         isOpen={dialogOpen}
         onClose={() => setDialogOpen(false)}
         title={dialogContent.title}
         description={dialogContent.description}
+        isProcessing={isPaymentProcessing}
       />
     </>
   );
