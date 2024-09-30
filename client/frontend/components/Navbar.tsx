@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../Assets/logo.png'; // Ensure the correct path to the logo
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -45,12 +46,15 @@ const Navbar = () => {
       <nav className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-4 shadow-md w-full">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo */}
-            <div
-            className="text-white text-3xl font-extrabold tracking-wide cursor-pointer"
+          <div
+            className="flex items-center cursor-pointer"
             onClick={() => navigate('/')}
-            >
-            CrickTrade
-            </div>
+          >
+            <img src={logo} alt="CrickTrade Logo" className="h-12 w-auto mr-2" />
+            <span className="text-white text-3xl font-extrabold tracking-wide">
+              CrickTrade
+            </span>
+          </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden mt-4">
@@ -69,7 +73,7 @@ const Navbar = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"}
+                  d={isMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16m-7 6h7'}
                 ></path>
               </svg>
             </button>
@@ -82,19 +86,24 @@ const Navbar = () => {
                 onClick={handlePortfolioClick}
                 className="hover:text-blue-400 cursor-pointer transition-colors duration-300"
               >
-              Portfolio
+                Portfolio
               </p>
             </li>
             <li className="transition transform hover:scale-105">
               <p
-                onClick={() => { navigate("/") }}
+                onClick={() => {
+                  navigate('/');
+                }}
                 className="hover:text-blue-400 cursor-pointer transition-colors duration-300"
               >
                 Player Live
               </p>
             </li>
             <li className="transition transform hover:scale-105">
-              <a href="/orderbook" className="hover:text-blue-400 transition-colors duration-300">
+              <a
+                href="/orderbook"
+                className="hover:text-blue-400 transition-colors duration-300"
+              >
                 OrderBook
               </a>
             </li>
@@ -132,14 +141,19 @@ const Navbar = () => {
               </li>
               <li>
                 <p
-                  onClick={() => { navigate("/") }}
+                  onClick={() => {
+                    navigate('/');
+                  }}
                   className="text-white hover:text-blue-400 cursor-pointer transition-colors duration-300"
                 >
                   Player Live
                 </p>
               </li>
               <li>
-                <a href="/orderbook" className="text-white hover:text-blue-400 transition-colors duration-300">
+                <a
+                  href="/orderbook"
+                  className="text-white hover:text-blue-400 transition-colors duration-300"
+                >
                   OrderBook
                 </a>
               </li>
