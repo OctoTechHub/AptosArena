@@ -56,7 +56,7 @@ const OrderBook = () => {
     const publicKey = localStorage.getItem('publicKey');
     const privateKey = localStorage.getItem('privateKey');
     try {
-      const response = await axios.post('https://cricktrade-server.azurewebsite.net/api/purchase/buyFromOrderBook', {
+      const response = await axios.post('http://localhost:3000/api/purchase/buyFromOrderBook', {
         orderId,
         publicKey,
         privateKey

@@ -288,7 +288,9 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
     }
 
     const buyerPrivateKey = new Ed25519PrivateKey(privateKey);  // Assuming the buyer provides their raw private key
-    const buyerAccount = Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+    const buyerAccount =  Account.fromPrivateKey({ privateKey: buyerPrivateKey });
+    console.log('Buyer account:', buyerAccount.privateKey.toString());
+    console.log('Buyer address:', buyerAccount.publicKey.toString());
     const sellerpvt=new Ed25519PrivateKey(decodedPrivateKey);
     const sellerAccount=Account.fromPrivateKey({privateKey:sellerpvt});
 
@@ -312,7 +314,8 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
        
         // Update order status to 'closed'
         const orderUpdate = await OrderBook.findByIdAndUpdate(orderId, { orderStatus: 'closed' }, { new: true });
-
+        const buyerBalanceAfterTxn = await aptos.getAccountAPTAmount({ accountAddress: buyerAccount.accountAddress });
+        console.log(`Buyer balance after transaction: ${buyerBalanceAfterTxn}`);
         // Update buyer's stock
         const buyerStockIndex = buyer.stocksOwned.findIndex(stock => stock.playerId === order.playerId);
         if (buyerStockIndex !== -1) {
@@ -342,6 +345,7 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
 
         res.send({
             message: 'Transaction successful',
+            buyerBalanceAfterTxn,
             transactionHash: response.hash,
             buyerUpdate: buyer,
             orderUpdate
