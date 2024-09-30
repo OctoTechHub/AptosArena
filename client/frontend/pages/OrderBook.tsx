@@ -23,24 +23,44 @@ const Alert: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const OrderBook = () => {
   const [orderBook, setOrderBook] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
+  // const [publicKey, setPublicKey] = useState('');  // Replace with actual public key of the user
+  // const [privateKey, setPrivateKey] = useState('');  // Replace with actual private key of the user
 
   useEffect(() => {
     const fetchOrderBook = async () => {
       try {
         const response = await axios.get(
-          "https://cricktrade-server.azurewebsites.net/api/purchase/getOrderBook"
+          'https://cricktrade-server.azurewebsites.net/api/purchase/getOrderBook'
         );
         setOrderBook(response.data);
         setLoading(false);
       } catch (err) {
-        setError("Failed to fetch order data");
+        setError('Failed to fetch order data');
         setLoading(false);
       }
     };
     fetchOrderBook();
   }, []);
+
+  const buyFromOrderBook = async (orderId: string) => {
+    const publicKey=localStorage.getItem('publicKey');
+    const privateKey=localStorage.getItem('privateKey');
+    try {
+      const response = await axios.post('http://localhost:3000/api/purchase/buyFromOrderBook', {
+        orderId,
+        publicKey,
+        privateKey
+      });
+      if(response.data.message==='Transaction successful'){
+        alert('Transaction successful');
+        // window.location.reload();
+      }
+    } catch (error) {
+      alert('Failed to process the transaction');
+    }
+  };
 
   const sortData = (key: keyof Order) => {
     let direction = 'ascending';
@@ -49,11 +69,13 @@ const OrderBook = () => {
     }
     setSortConfig({ key, direction });
 
-    const sortedData = orderBook ? [...orderBook].sort((a, b) => {
-      if (a[key] < b[key]) return direction === 'ascending' ? -1 : 1;
-      if (a[key] > b[key]) return direction === 'ascending' ? 1 : -1;
-      return 0;
-    }) : [];
+    const sortedData = orderBook
+      ? [...orderBook].sort((a, b) => {
+        if (a[key] < b[key]) return direction === 'ascending' ? -1 : 1;
+        if (a[key] > b[key]) return direction === 'ascending' ? 1 : -1;
+        return 0;
+      })
+      : [];
 
     setOrderBook(sortedData);
   };
@@ -74,16 +96,12 @@ const OrderBook = () => {
     );
   }
 
-  return (<>
-    <Navbar />
-    <Rollingstrip />
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white w-full">
-      <div className="w-full max-w-8xl p-10 rounded-lg shadow-xl">
-        {loading ? (
-          <div className="text-2xl font-medium">Loading player data...</div>
-        ) : error ? (
-          <div className="text-2xl text-red-500 font-semibold">{error}</div>
-        ) : (
+  return (
+    <>
+      <Navbar />
+      <Rollingstrip />
+      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white w-full">
+        <div className="w-full max-w-8xl p-10 rounded-lg shadow-xl">
           <div className="container mx-auto p-8 bg-gray-900 min-h-screen">
             <h1 className="text-4xl font-bold mb-8 text-white text-center">Order Book</h1>
             <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
@@ -115,6 +133,7 @@ const OrderBook = () => {
                         Time
                         <ArrowUpDown className="inline ml-1" size={14} />
                       </th>
+                      <th className="px-6 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-600">
@@ -122,14 +141,12 @@ const OrderBook = () => {
                       orderBook.map((order) => (
                         <tr
                           key={order._id}
-                          className={`text-gray-300 hover:bg-gray-700 transition-all duration-300 ease-in-out ${order.orderType === "buy"
-                            ? "bg-green-900/30"
-                            : "bg-red-900/30"
+                          className={`text-gray-300 hover:bg-gray-700 transition-all duration-300 ease-in-out ${order.orderType === 'buy' ? 'bg-green-900/30' : 'bg-red-900/30'
                             }`}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">{order.playerId}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {order.orderType === "buy" ? (
+                            {order.orderType === 'buy' ? (
                               <span className="text-green-400 font-semibold flex items-center">
                                 <ArrowUp className="mr-1" size={14} />
                                 Buy
@@ -141,18 +158,32 @@ const OrderBook = () => {
                               </span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">{order.orderPrice.toFixed(2)} APT</td>
+                          <td  className="px-6 py-4 whitespace-nowrap">{order.orderPrice.toFixed(2)} APT</td>
                           <td className="px-6 py-4 whitespace-nowrap">{order.orderQuantity}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.orderStatus === 'completed' ? 'bg-green-100 text-green-800' :
-                              order.orderStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
+                            <span
+                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.orderStatus === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : order.orderStatus === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                            >
                               {order.orderStatus}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {new Date(order.orderTime).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {order.orderType === 'sell' && order.orderStatus !== 'closed' && (
+                              <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                                onClick={() => buyFromOrderBook(order._id)}
+                              >
+                                Buy
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -161,14 +192,10 @@ const OrderBook = () => {
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
-    </div>
-  </>
-
+    </>
   );
 };
 
 export default OrderBook;
-
-

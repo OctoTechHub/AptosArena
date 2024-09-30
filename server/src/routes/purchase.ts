@@ -228,13 +228,31 @@ purchaseRouter.post('/addToOrderBook', async (req: Request, res: Response) => {
 
 purchaseRouter.get('/getOrderBook', async (req: Request, res: Response) => {
     try {
+        // Fetch the entire order book
         const orderBook = await OrderBook.find();
-        res.json(orderBook);
+
+        // Fetch the unique player IDs from the orders
+        const playerIds = orderBook.map(order => order.playerId);
+
+        // Retrieve player details based on playerId
+        const players = await Player.find({ _id: { $in: playerIds } });
+
+        // Map the orders with their corresponding player details
+        const enrichedOrderBook = orderBook.map(order => {
+            const player = players.find(p => p._id.toString() === order.playerId.toString());
+            return {
+                ...order.toObject(), // Convert the order to a plain object
+                playerDetails: player ? player.toObject() : null // Include player details
+            };
+        });
+
+        res.json(enrichedOrderBook);
     } catch (error) {
-        console.error('Error fetching order book:', error);
-        res.status(500).send('<p>Internal server error. Could not fetch order book.</p>');
+        console.error('Error fetching order book with player details:', error);
+        res.status(500).send('<p>Internal server error. Could not fetch order book with player details.</p>');
     }
-})
+});
+
 purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => {
     const { orderId, publicKey, privateKey } = req.body;
 
@@ -291,9 +309,7 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
         const response = await aptos.waitForTransaction({ transactionHash: pendingTxn.hash });
         console.log(`Transaction successful: ${response.hash}`);
 
-        const newBuyerBalance = await aptos.getAccountAPTAmount({ accountAddress: buyerAccount.accountAddress });
-        const newSellerBalance = await aptos.getAccountAPTAmount({ accountAddress: sellerAccount.accountAddress });
-
+       
         // Update order status to 'closed'
         const orderUpdate = await OrderBook.findByIdAndUpdate(orderId, { orderStatus: 'closed' }, { new: true });
 
@@ -327,8 +343,6 @@ purchaseRouter.post('/buyFromOrderBook', async (req: Request, res: Response) => 
         res.send({
             message: 'Transaction successful',
             transactionHash: response.hash,
-            newBuyerBalance,
-            newSellerBalance,
             buyerUpdate: buyer,
             orderUpdate
         });
