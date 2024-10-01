@@ -48,7 +48,7 @@ export function AnimatedPinDemo() {
     const fetchPlayers = async () => {
       try {
         const response = await axios.get(
-          "https://cricktrade-server.azurewebsites.net/api/player/getallplayers"
+          "https://api.cricktrade.co/api/player/getallplayers"
         );
         const sortedPlayers = response.data.sort(
           (a: Player, b: Player) => b.value - a.value

@@ -24,7 +24,7 @@ const AllPlayers = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get("https://cricktrade-server.azurewebsites.net/api/player/getallplayers");
+        const response = await axios.get("https://api.cricktrade.co/api/player/getallplayers");
         setPlayers(response.data);
         setLoading(false);
       } catch (err) {

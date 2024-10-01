@@ -38,7 +38,7 @@ const UserProfile: React.FC = () => {
 
     const fetchStocks = async () => {
       try {
-        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/user/get-stocks/${publicKey}`);
+        const response = await axios.get(`https://api.cricktrade.co/api/user/get-stocks/${publicKey}`);
         const fetchedStocks = response.data;
 
         setStocks(fetchedStocks);
@@ -99,7 +99,7 @@ const UserProfile: React.FC = () => {
     const privateKey = localStorage.getItem('privateKey');
 
     try {
-      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/purchase/addToOrderBook', {
+      const response = await axios.post('https://api.cricktrade.co/api/purchase/addToOrderBook', {
         orderType: 'sell',
         playerId,
         orderPrice,

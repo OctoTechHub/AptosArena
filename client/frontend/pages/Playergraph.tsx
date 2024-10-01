@@ -48,7 +48,7 @@ const PlayerGraph: React.FC = () => {
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
-        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/player/getPlayer/${id}`);
+        const response = await axios.get(`https://api.cricktrade.co/api/player/getPlayer/${id}`);
         setPlayer(response.data);
         setLoading(false);
       } catch (err) {
@@ -116,7 +116,7 @@ const PlayerGraph: React.FC = () => {
       }
 
       try {
-        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/user/get-stocks/${publicKey}`);
+        const response = await axios.get(`https://api.cricktrade.co/api/user/get-stocks/${publicKey}`);
         const fetchedStocks = response.data;
 
         const playerStock = fetchedStocks.find((stock: any) =>
@@ -149,7 +149,7 @@ const PlayerGraph: React.FC = () => {
     }
 
     try {
-      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/purchase/buy-player', {
+      const response = await axios.post('https://api.cricktrade.co/api/purchase/buy-player', {
         privateKey,
         publicKey,
         amount,
