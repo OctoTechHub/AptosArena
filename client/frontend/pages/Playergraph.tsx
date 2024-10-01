@@ -42,8 +42,9 @@ const PlayerGraph: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [playerQuantity, setPlayerQuantity] = useState<number>(0);
   const [isGraph, setIsgraph] = useState<boolean>(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogContent, setDialogContent] = useState({ title: '', description: '' });
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState<boolean>(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentDialogContent, setPaymentDialogContent] = useState({ title: '', description: '' });
 
   useEffect(() => {
     const fetchPlayer = async () => {
@@ -148,6 +149,13 @@ const PlayerGraph: React.FC = () => {
       return;
     }
 
+    setIsPaymentProcessing(true);
+    setPaymentDialogContent({
+      title: 'Processing Payment',
+      description: 'Please wait while we process your payment...'
+    });
+    setPaymentDialogOpen(true);
+
     try {
       const response = await axios.post('https://api.cricktrade.co/api/purchase/buy-player', {
         privateKey,
@@ -156,23 +164,23 @@ const PlayerGraph: React.FC = () => {
         playerId: id,
         decrementAmount
       });
-
+  
       if (response.data.message === 'Transaction successful') {
-        setDialogContent({
+        setPaymentDialogContent({
           title: 'Payment Successful',
           description: 'Your transaction has been processed successfully.'
         });
       } else {
-        throw new Error('Transaction failed');
+        // throw new Error('Transaction failed');
       }
     } catch (error) {
-      setDialogContent({
+      setPaymentDialogContent({
         title: 'Payment Failed',
         description: 'We were unable to process your transaction. Please try again later.'
       });
       console.log(error);
     } finally {
-      setDialogOpen(true);
+      setIsPaymentProcessing(false);
     }
   };
 
@@ -276,32 +284,41 @@ const PlayerGraph: React.FC = () => {
     ],
   };
 
-  const Dialog: React.FC<{
+  const PaymentDialog: React.FC<{
     isOpen: boolean;
     onClose: () => void;
     title: string;
     description: string;
-  }> = ({ isOpen, onClose, title, description }) => {
+    isProcessing: boolean;
+  }> = ({ isOpen, onClose, title, description, isProcessing }) => {
     if (!isOpen) return null;
-  
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold text-white">{title}</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-white">
-              <X size={24} />
-            </button>
+            {!isProcessing && (
+              <button onClick={onClose} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            )}
           </div>
           <p className="text-gray-300 mb-6">{description}</p>
-          <div className="flex justify-end">
-            <button
-              onClick={onClose}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
-            >
-              Close
-            </button>
-          </div>
+          {isProcessing && (
+            <div className="flex justify-center mb-6">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          )}
+          {!isProcessing && (
+            <div className="flex justify-end">
+              <button
+                onClick={onClose}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+              >
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -442,11 +459,12 @@ const PlayerGraph: React.FC = () => {
           )}
         </div>
       </div>
-      <Dialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        title={dialogContent.title}
-        description={dialogContent.description}
+      <PaymentDialog
+        isOpen={paymentDialogOpen}
+        onClose={() => setPaymentDialogOpen(false)}
+        title={paymentDialogContent.title}
+        description={paymentDialogContent.description}
+        isProcessing={isPaymentProcessing}
       />
     </>
   );
