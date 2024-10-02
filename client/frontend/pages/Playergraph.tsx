@@ -171,7 +171,7 @@ const PlayerGraph: React.FC = () => {
           description: 'Your transaction has been processed successfully.'
         });
       } else {
-        throw new Error('Transaction failed');
+        // throw new Error('Transaction failed');
       }
     } catch (error) {
       setPaymentDialogContent({

@@ -41,9 +41,8 @@ const UserProfile: React.FC = () => {
     // Fetch stocks and balance data
     const fetchStocksAndBalance = async () => {
       try {
-        // Fetch user stocks
-        const stockResponse = await axios.get(`https://api.cricktrade.co/api/user/get-stocks/${publicKey}`);
-        const fetchedStocks = stockResponse.data;
+        const response = await axios.get(`https://api.cricktrade.co/api/user/get-stocks/${publicKey}`);
+        const fetchedStocks = response.data;
 
         setStocks(fetchedStocks);
 

@@ -73,7 +73,7 @@ const Signin = () => {
   const handleSignInWithKeys = async (publicKey: string, privateKey: string) => {
     setLoading(true);
     try {
-      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/user/signin', { publicKey, privateKey });
+      const response = await axios.post('https://api.cricktrade.co/api/user/signin', { publicKey, privateKey });
       if (response.status === 200) {
         localStorage.setItem('publicKey', publicKey);
         localStorage.setItem('privateKey', privateKey);
