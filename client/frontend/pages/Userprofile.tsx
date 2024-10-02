@@ -30,24 +30,29 @@ const UserProfile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [roleCounts, setRoleCounts] = useState({ batsmen: 0, bowlers: 0, allRounders: 0 });
   const [totalWorth, setTotalWorth] = useState(0);
+  const [balance, setBalance] = useState<number | string>('-');
   const [sellOrderLoading, setSellOrderLoading] = useState<boolean>(false);
   const [sellOrderError, setSellOrderError] = useState<string | null>(null);
 
   useEffect(() => {
     const publicKey = localStorage.getItem('publicKey');
+    const privateKey = localStorage.getItem('privateKey');
 
-    const fetchStocks = async () => {
+    // Fetch stocks and balance data
+    const fetchStocksAndBalance = async () => {
       try {
-        const response = await axios.get(`https://cricktrade-server.azurewebsites.net/api/user/get-stocks/${publicKey}`);
-        const fetchedStocks = response.data;
+        // Fetch user stocks
+        const stockResponse = await axios.get(`https://api.cricktrade.co/api/user/get-stocks/${publicKey}`);
+        const fetchedStocks = stockResponse.data;
 
         setStocks(fetchedStocks);
 
+        // Calculate role counts and total worth
         const counts = { batsmen: 0, bowlers: 0, allRounders: 0 };
-        let total = 0;
+        let totalInvested = 0;
 
         fetchedStocks.forEach((stock: Stock) => {
-          total += stock.quantity * stock.player.value;
+          totalInvested += stock.quantity * stock.player.value;
 
           if (stock.player.role.toLowerCase() === 'batsman') {
             counts.batsmen += 1;
@@ -59,15 +64,23 @@ const UserProfile: React.FC = () => {
         });
 
         setRoleCounts(counts);
-        setTotalWorth(total);
+        setTotalWorth(totalInvested);
+
+        // Fetch user balance
+        const balanceResponse = await axios.get(`https://api.cricktrade.co/api/purchase/get-balance/${privateKey}`);
+        const fetchedBalance = balanceResponse.data?.['apt token'] ?? 0;
+
+        // Subtract total invested amount from balance
+        const finalBalance = fetchedBalance - totalInvested;
+        setBalance(finalBalance >= 0 ? finalBalance.toFixed(2) : '0.00'); // Show 0 if balance goes negative
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch stocks data');
+        setError('Failed to fetch data');
         setLoading(false);
       }
     };
 
-    fetchStocks();
+    fetchStocksAndBalance();
   }, []);
 
   const totalPlayers = roleCounts.batsmen + roleCounts.bowlers + roleCounts.allRounders;
@@ -99,7 +112,7 @@ const UserProfile: React.FC = () => {
     const privateKey = localStorage.getItem('privateKey');
 
     try {
-      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/purchase/addToOrderBook', {
+      const response = await axios.post('https://api.cricktrade.co/api/purchase/addToOrderBook', {
         orderType: 'sell',
         playerId,
         orderPrice,
@@ -142,6 +155,9 @@ const UserProfile: React.FC = () => {
                 <p className="text-xl">
                   Total Value of Assets: <span className="text-green-400">{totalWorth.toFixed(2)} APT</span>
                 </p>
+
+                {/* Display the final balance after deducting the invested amount */}
+                <p>Your Balance: <span className="text-green-400">{balance}</span> APT</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mt-8">
@@ -182,17 +198,19 @@ const UserProfile: React.FC = () => {
                       >
                         {sellOrderLoading ? 'Processing...' : 'Sell to Orderbook'}
                       </button>
-                      {sellOrderError && <p className="text-red-400 mt-2">{sellOrderError}</p>}
+                      {sellOrderError && <p className="text-red-500 mt-2">{sellOrderError}</p>}
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Role bifurcation with Pie Chart */}
-              <div className="mt-12 bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center">
-                <h2 className="text-3xl font-semibold mb-6">Player Role Summary</h2>
-                <div className="w-full sm:w-64 mx-auto">
-                  <Pie data={pieData} />
+              {/* Pie Chart */}
+              <div className="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg mt-8">
+                <h2 className="text-2xl font-semibold mb-4 text-center">Player Roles Distribution</h2>
+                <div className="flex justify-center">
+                  <div className="w-64 sm:w-80">
+                    <Pie data={pieData} />
+                  </div>
                 </div>
               </div>
             </div>

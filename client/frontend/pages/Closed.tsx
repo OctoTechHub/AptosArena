@@ -14,7 +14,7 @@ const ClosedOrders = () => {
   useEffect(() => {
     const fetchClosedOrders = async () => {
       try {
-        const response = await axios.get("https://cricktrade-server.azurewebsites.net/api/purchase/getOrderBook");
+        const response = await axios.get("https://api.cricktrade.co/api/purchase/getOrderBook");
         const orders = response.data.filter((order: Order) => order.orderStatus === "closed");
         setClosedOrders(orders);
         console.log(closedOrders)

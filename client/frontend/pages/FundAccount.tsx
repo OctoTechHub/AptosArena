@@ -28,7 +28,7 @@ const FundAccount = () => {
     setResponseMessage('');
 
     try {
-      const response = await axios.post('https://cricktrade-server.azurewebsites.net/api/purchase/fund-account', {
+      const response = await axios.post('https://api.cricktrade.co/api/purchase/fund-account', {
         accountAddress: privateKey,
       });
 

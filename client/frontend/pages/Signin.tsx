@@ -17,7 +17,7 @@ const Signin = () => {
 
   const handleGenerateKeys = async () => {
     try {
-      const response = await axios.get('https://cricktrade-server.azurewebsites.net/api/user/generateAccount');
+      const response = await axios.get('https://api.cricktrade.co/api/user/generateAccount');
       const { data } = response;
       const publicKey = data.match(/<p><strong>Public Key:<\/strong> (.*)<\/p>/)[1];
       const privateKey = data.match(/<p><strong>Private Key:<\/strong> (.*)<\/p>/)[1];
